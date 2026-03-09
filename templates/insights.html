@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white">
+  <div class="bg-slate-900 text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl font-bold mb-6">Insights & News</h1>
+      <p class="text-xl text-slate-300 max-w-3xl mx-auto">Latest thinking, case studies, and updates from the Neargoal team.</p>
+    </div>
+  </div>
+
+  <div class="border-b border-slate-200 sticky top-[72px] md:top-[88px] bg-white z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex space-x-8 overflow-x-auto">
+        <a href="#blogs" class="py-4 border-b-2 font-medium whitespace-nowrap text-sky-600 border-sky-600">Expert Blogs</a>
+        <a href="#case-studies" class="py-4 border-b-2 font-medium whitespace-nowrap border-transparent text-slate-500 hover:text-slate-700">Case Studies</a>
+        <a href="#news" class="py-4 border-b-2 font-medium whitespace-nowrap border-transparent text-slate-500 hover:text-slate-700">Market News</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="blogs" class="bg-slate-50 min-h-screen py-16 scroll-mt-32">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-slate-900 mb-4">Expert Insights</h2>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">Analysis and perspectives on the trends shaping global industries.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for blog in blogs %}
+        <article class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+          <img src="{{ blog.image }}" alt="{{ blog.title }}" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-500" referrerpolicy="no-referrer" />
+          <div class="p-6 flex-1 flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-sky-600 uppercase tracking-wider">{{ blog.category }}</span>
+              <div class="flex items-center text-xs text-slate-500">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5"></i>
+                {{ blog.date_label }}
+              </div>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mb-3 leading-tight"><a href="{{ url_for('blog_detail', slug=blog.slug) }}" class="hover:text-sky-600 transition-colors">{{ blog.title }}</a></h2>
+            <p class="text-slate-600 text-sm mb-4 flex-1">{{ blog.summary }}</p>
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100 mt-auto">
+              <div class="flex items-center text-sm text-slate-700 font-medium">{{ blog.author }}</div>
+              <a href="{{ url_for('blog_detail', slug=blog.slug) }}" class="text-sky-600 hover:text-sky-500 text-sm font-semibold flex items-center">
+                Read More
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div id="case-studies" class="bg-white min-h-screen py-16 scroll-mt-32">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-slate-900 mb-4">Case Studies</h2>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">Real-world examples of how our intelligence drives strategic success.</p>
+      </div>
+      <div class="space-y-12">
+        {% for study in case_studies %}
+        <div class="bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div class="md:flex">
+            <div class="md:w-2/5">
+              <img src="{{ study.image }}" alt="{{ study.title }}" class="w-full h-full object-cover min-h-[300px]" referrerpolicy="no-referrer" />
+            </div>
+            <div class="md:w-3/5 p-8 md:p-12 flex flex-col justify-center">
+              <div class="flex items-center gap-2 text-sky-600 font-bold text-sm uppercase tracking-wider mb-4">{{ study.client }}</div>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-4">{{ study.title }}</h2>
+              <div class="bg-white p-6 rounded-lg border-l-4 border-green-500 mb-8">
+                <p class="font-bold text-slate-900 mb-1">Impact</p>
+                <p class="text-slate-600">{{ study.impact }}</p>
+              </div>
+              <div>
+                <a href="{{ url_for('case_study_detail', slug=study.slug) }}" class="inline-flex items-center font-bold text-sky-600 hover:text-sky-500 transition-colors">
+                  Read Full Case Study
+                  <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div id="news" class="bg-slate-50 min-h-screen py-16 scroll-mt-32">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-slate-900 mb-4">Market Updates</h2>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">Stay informed with the latest corporate developments and press releases.</p>
+      </div>
+      <div class="grid gap-8">
+        {% for update in updates %}
+        <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative">
+          <a href="{{ url_for('update_detail', slug=update.slug) }}" class="absolute inset-0 z-10" aria-label="Read more about {{ update.title }}"></a>
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-sky-50 rounded-lg text-sky-600">
+              <i data-lucide="{% if update.category == 'Press Releases' %}file-text{% else %}newspaper{% endif %}" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <span class="text-sm font-medium text-sky-600 mb-1 block uppercase tracking-wide">{{ update.category }}</span>
+              <h3 class="text-xl font-bold text-slate-900 mb-2">{{ update.title }}</h3>
+              <p class="text-slate-600 mb-4">{{ update.summary }}</p>
+              <span class="text-sm text-slate-400">{{ update.date_label }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-slate-50 min-h-screen py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-slate-900 text-white p-8 md:p-12">
+        <div class="flex flex-wrap gap-3 mb-6">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sky-600 text-white">{{ report.industry.name }}</span>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-700 text-slate-300">ID: {{ report.code }}</span>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold mb-6 leading-tight">{{ report.title }}</h1>
+        <div class="flex flex-wrap gap-6 text-sm text-slate-300">
+          <div class="flex items-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4 text-sky-400"></i>
+            <span>Published: {{ report.published_label }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4 text-sky-400"></i>
+            <span>Pages: {{ report.pages }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="globe" class="w-4 h-4 text-sky-400"></i>
+            <span>Format: PDF + Excel</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="map" class="w-4 h-4 text-sky-400"></i>
+            <span>Coverage: {{ report.coverage }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8 md:p-12">
+        <div class="lg:col-span-2 space-y-8">
+          <div class="border-b border-slate-200">
+            <nav class="-mb-px flex flex-wrap gap-6">
+              <button type="button" data-tab-target="overview" class="tab-button border-sky-600 text-sky-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Report Overview</button>
+              <button type="button" data-tab-target="toc" class="tab-button border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Table of Contents</button>
+              <button type="button" data-tab-target="lof" class="tab-button border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">List of Figures</button>
+              <button type="button" data-tab-target="lot" class="tab-button border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">List of Tables</button>
+              <button type="button" data-tab-target="companies" class="tab-button border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Companies</button>
+            </nav>
+          </div>
+
+          <section data-tab-panel="overview" class="tab-panel">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Report Overview</h2>
+            <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+              <p>{{ report.description }}</p>
+              <p class="mt-4">Our analysis integrates proprietary data models with expert interviews to provide a high-fidelity view of market dynamics. We examine not just the top-line growth figures, but the underlying profitability pools, supply chain bottlenecks, and technological inflection points that will determine winners and losers in the coming decade.</p>
+            </div>
+          </section>
+
+          <section data-tab-panel="toc" class="tab-panel hidden">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Table of Contents</h2>
+            <div class="bg-slate-50 rounded-lg border border-slate-200 p-6">
+              <ul class="space-y-3">
+                {% for item in report.toc %}
+                <li class="flex items-start gap-3 text-slate-700"><span class="font-mono text-sky-600 text-sm mt-1">{{ loop.index }}.</span><span>{{ item }}</span></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </section>
+
+          <section data-tab-panel="lof" class="tab-panel hidden">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">List of Figures</h2>
+            <div class="bg-slate-50 rounded-lg border border-slate-200 p-6">
+              {% if report.lof %}
+              <ul class="space-y-3">
+                {% for item in report.lof %}
+                <li class="flex items-start gap-3 text-slate-700"><span class="font-mono text-sky-600 text-sm mt-1">Fig {{ loop.index }}.</span><span>{{ item }}</span></li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="text-slate-500 italic">List of figures not available for this report.</p>
+              {% endif %}
+            </div>
+          </section>
+
+          <section data-tab-panel="lot" class="tab-panel hidden">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">List of Tables</h2>
+            <div class="bg-slate-50 rounded-lg border border-slate-200 p-6">
+              {% if report.lot %}
+              <ul class="space-y-3">
+                {% for item in report.lot %}
+                <li class="flex items-start gap-3 text-slate-700"><span class="font-mono text-sky-600 text-sm mt-1">Table {{ loop.index }}.</span><span>{{ item }}</span></li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="text-slate-500 italic">List of tables not available for this report.</p>
+              {% endif %}
+            </div>
+          </section>
+
+          <section data-tab-panel="companies" class="tab-panel hidden">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Key Companies Covered</h2>
+            <div class="flex flex-wrap gap-2">
+              {% for company in report.companies %}
+              <span class="inline-flex items-center px-3 py-1 rounded-md text-sm bg-white border border-slate-200 text-slate-600">{{ company }}</span>
+              {% endfor %}
+              <span class="inline-flex items-center px-3 py-1 rounded-md text-sm bg-slate-50 text-slate-500 italic">+ 40 more</span>
+            </div>
+          </section>
+        </div>
+
+        <div class="space-y-8">
+          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 sticky top-24">
+            <div class="mb-6">
+              <p class="text-sm text-slate-500 mb-1">Single User License</p>
+              <div class="flex items-baseline gap-1">
+                <span class="text-3xl font-bold text-slate-900">${{ report.price }}</span>
+                <span class="text-slate-500">USD</span>
+              </div>
+            </div>
+
+            <div class="space-y-3 mb-8">
+              <button type="button" data-modal-open="buy-report" class="w-full flex items-center justify-center px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-sky-900/20">
+                Buy Now
+                <i data-lucide="lock" class="w-4 h-4 ml-2"></i>
+              </button>
+              <button type="button" data-modal-open="sample-report" class="w-full flex items-center justify-center px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg transition-colors">
+                Request Sample
+                <i data-lucide="download" class="w-4 h-4 ml-2"></i>
+              </button>
+              <button type="button" data-modal-open="analyst-report" class="w-full flex items-center justify-center px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg transition-colors">
+                Speak to Analyst
+                <i data-lucide="message-circle" class="w-4 h-4 ml-2"></i>
+              </button>
+            </div>
+
+            <div class="space-y-4 pt-6 border-t border-slate-200">
+              <h4 class="font-semibold text-slate-900">Why buy this report?</h4>
+              <ul class="space-y-3">
+                {% for item in ["Exclusive analyst insights", "Verified market data", "Strategic recommendations", "1-hour analyst support"] %}
+                <li class="flex items-center text-sm text-slate-600">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-green-500 mr-2 flex-shrink-0"></i>
+                  {{ item }}
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl border border-slate-200">
+            <h4 class="font-bold text-slate-900 mb-4 flex items-center">
+              <i data-lucide="bar-chart-2" class="w-5 h-5 text-sky-600 mr-2"></i>
+              Related Reports
+            </h4>
+            <ul class="space-y-4">
+              {% if related_reports %}
+              {% for related in related_reports %}
+              <li>
+                <a href="{{ url_for('report_detail', industry_slug=related.industry.slug, report_id=related.id) }}" class="block group">
+                  <h5 class="text-sm font-medium text-slate-900 group-hover:text-sky-600 transition-colors mb-1">{{ related.title }}</h5>
+                  <p class="text-xs text-slate-500">{{ related.published_label }} &bull; ${{ related.price }}</p>
+                </a>
+              </li>
+              {% endfor %}
+              {% else %}
+              <li class="text-sm text-slate-500">No other reports in this category.</li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% for modal_id, modal_title, inquiry_type in [
+  ('buy-report', 'Purchase Report', 'report-purchase'),
+  ('sample-report', 'Request Sample PDF', 'report-sample'),
+  ('analyst-report', 'Speak to an Analyst', 'report-analyst')
+] %}
+<div id="{{ modal_id }}" class="modal hidden fixed inset-0 z-[70]">
+  <div class="modal-overlay absolute inset-0 bg-slate-900/70" data-modal-close></div>
+  <div class="relative min-h-full flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl p-6 md:p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">{{ modal_title }}</h2>
+        <button type="button" class="text-slate-400 hover:text-slate-600" data-modal-close>&times;</button>
+      </div>
+      <form action="{{ url_for('submit_inquiry') }}" method="post" class="space-y-4">
+        <input type="hidden" name="inquiry_type" value="{{ inquiry_type }}" />
+        <input type="hidden" name="target_type" value="report" />
+        <input type="hidden" name="target_slug" value="{{ report.id }}" />
+        <input type="hidden" name="redirect_to" value="{{ request.path }}" />
+        {% if modal_id == 'buy-report' %}
+        <div class="bg-slate-50 p-4 rounded-lg mb-4 border border-slate-200">
+          <p class="font-bold text-slate-900">{{ report.title }}</p>
+          <p class="text-sm text-slate-600">Single User License - ${{ report.price }}</p>
+        </div>
+        {% endif %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+            <input type="text" name="name" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Work Email</label>
+            <input type="email" name="email" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Company</label>
+          <input type="text" name="company" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+        </div>
+        {% if modal_id != 'buy-report' %}
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">{% if modal_id == 'analyst-report' %}Specific Questions / Topic{% else %}Phone Number{% endif %}</label>
+          {% if modal_id == 'analyst-report' %}
+          <textarea rows="4" name="requirement" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border"></textarea>
+          {% else %}
+          <input type="tel" name="phone" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+          {% endif %}
+        </div>
+        {% endif %}
+        <div class="pt-4">
+          <button type="submit" class="w-full bg-sky-600 text-white font-bold py-3 rounded-md hover:bg-sky-500 transition-colors">
+            {% if modal_id == 'buy-report' %}Proceed to Payment{% elif modal_id == 'sample-report' %}Request Sample{% else %}Submit Request{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

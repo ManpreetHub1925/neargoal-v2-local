@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white">
+  <section class="relative bg-slate-900 text-white py-[55px] overflow-hidden">
+    <div class="absolute inset-0 z-0 opacity-20 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');"></div>
+    <div class="absolute inset-0 z-10 bg-gradient-to-r from-slate-900 via-slate-900/90 to-transparent"></div>
+    <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight">
+          Research That Brings You Closer to Your <span class="text-sky-400">Business Goals</span>
+        </h1>
+        <p class="text-lg md:text-xl text-slate-300 mb-8 leading-relaxed max-w-2xl">
+          Neargoal Consulting delivers deep, analyst-driven market research and strategic intelligence across high-impact global industries.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="{{ url_for('contact') }}" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-sky-600 hover:bg-sky-500 transition-colors shadow-lg shadow-sky-900/20">
+            Contact Us
+            <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
+          </a>
+          <a href="{{ url_for('contact') }}" class="inline-flex items-center justify-center px-8 py-3 border border-slate-600 text-base font-medium rounded-md text-slate-200 hover:bg-slate-800 transition-colors">
+            Request Sample
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="bg-slate-50 py-12 border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <form action="{{ url_for('market_intelligence') }}" method="get" class="relative shadow-sm">
+        
+        <input type="text" name="search" class="block w-full pl-12 pr-32 py-4 border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-lg shadow-md transition-shadow" placeholder="Search Reports, Corporate Developments & PRs..." />
+        <button type="submit" class="absolute inset-y-2 right-2 px-6 bg-slate-900 text-white rounded-md hover:bg-slate-800 transition-colors font-medium">
+          Search
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl font-bold text-slate-900 sm:text-4xl mb-4">Market Intelligence</h2>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">Comprehensive coverage across key global sectors driving economic growth and technological innovation.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for industry in industries %}
+        <a href="{{ url_for('industry_detail', industry_slug=industry.slug) }}" class="group block h-full relative rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 aspect-[4/3]">
+          <div class="absolute inset-0">
+            <img src="{{ industry.image }}" alt="{{ industry.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" referrerpolicy="no-referrer" />
+            <div class="absolute inset-0 bg-slate-900/60 group-hover:bg-slate-900/50 transition-colors duration-300"></div>
+          </div>
+          <div class="relative z-10 p-8 h-full flex flex-col justify-end">
+            <div class="mb-auto">
+              <div class="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center mb-6 border border-white/20">
+                <i data-lucide="{{ industry.slug|industry_icon_name }}" class="w-6 h-6 text-white"></i>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2 leading-tight">{{ industry.name }}</h3>
+            <p class="text-sky-300 text-sm mt-2 flex items-center font-medium opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+              Explore Reports
+              <i data-lucide="arrow-right" class="ml-2 w-4 h-4"></i>
+            </p>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl font-bold text-slate-900 sm:text-4xl mb-4">Consulting & Advisory Services</h2>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">Tailored strategic solutions to help you navigate complex challenges and seize opportunities.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for service in services %}
+        <a href="{{ url_for('consulting_detail', slug=service.slug) }}" class="group block h-full relative rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 aspect-[4/3]">
+          <div class="absolute inset-0">
+            <img src="{{ service.image }}" alt="{{ service.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" referrerpolicy="no-referrer" />
+            <div class="absolute inset-0 bg-slate-900/60 group-hover:bg-slate-900/50 transition-colors duration-300"></div>
+          </div>
+          <div class="relative z-10 p-8 h-full flex flex-col justify-end">
+            <div class="mb-auto">
+              <div class="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center mb-6 border border-white/20">
+                <i data-lucide="{{ service.slug|service_icon_name }}" class="w-6 h-6 text-white"></i>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2 leading-tight">{{ service.name }}</h3>
+            <p class="text-sky-300 text-sm mt-2 flex items-center font-medium opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+              Learn More
+              <i data-lucide="arrow-right" class="ml-2 w-4 h-4"></i>
+            </p>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 bg-white border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl font-bold text-slate-900 sm:text-4xl mb-4">Why Neargoal</h2>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">We provide the strategic clarity needed to navigate complex market landscapes.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div class="flex flex-col items-center text-center p-6">
+          <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-6 text-sky-600">
+            <i data-lucide="bar-chart-3" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-3">Analyst-led Research</h3>
+          <p class="text-slate-600 leading-relaxed">Focus on delivering decision-grade insights backed by rigorous methodology and deep industry expertise.</p>
+        </div>
+        <div class="flex flex-col items-center text-center p-6">
+          <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-6 text-sky-600">
+            <i data-lucide="globe" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-3">Competitive Intelligence</h3>
+          <p class="text-slate-600 leading-relaxed">Expertise in uncovering hard-to-access competitive intelligence and market nuances others miss.</p>
+        </div>
+        <div class="flex flex-col items-center text-center p-6">
+          <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-6 text-sky-600">
+            <i data-lucide="shield-check" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-3">Verified Information</h3>
+          <p class="text-slate-600 leading-relaxed">High-confidence verified information you can trust for critical strategic decisions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl font-bold text-slate-900 sm:text-4xl mb-4">Latest Reports</h2>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">Explore our most recent market intelligence reports across various industries.</p>
+      </div>
+      <div class="relative">
+        <div class="flex overflow-x-auto pb-8 gap-6 snap-x snap-mandatory scrollbar-hide">
+          {% for report in latest_reports %}
+          <div class="min-w-[300px] md:min-w-[350px] bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow snap-center flex flex-col">
+            <div class="flex flex-wrap gap-2 mb-3">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">{{ report.industry.name }}</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2 line-clamp-2 h-14">
+              <a href="{{ url_for('report_detail', industry_slug=report.industry.slug, report_id=report.id) }}" class="hover:text-sky-600 transition-colors">{{ report.title }}</a>
+            </h3>
+            <p class="text-slate-600 text-sm mb-4 line-clamp-3 flex-grow">{{ report.summary }}</p>
+            <div class="flex items-center justify-between text-xs text-slate-500 font-medium mt-auto pt-4 border-t border-slate-100">
+              <span class="inline-flex items-center">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5"></i>
+                {{ report.published_label }}
+              </span>
+              <span class="font-bold text-slate-900">${{ report.price }}</span>
+            </div>
+            <a href="{{ url_for('report_detail', industry_slug=report.industry.slug, report_id=report.id) }}" class="mt-4 w-full flex items-center justify-center px-4 py-2 border border-sky-600 text-sm font-medium rounded-md text-sky-600 bg-white hover:bg-sky-50 transition-colors">
+              View Report
+              <i data-lucide="arrow-right" class="ml-2 w-4 h-4"></i>
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="text-center mt-8">
+        <a href="{{ url_for('market_intelligence') }}" class="inline-flex items-center text-sky-600 font-medium hover:text-sky-500">
+          View All Reports
+          <i data-lucide="arrow-right" class="ml-2 w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-sky-600 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-white mb-6">Ready to gain a competitive edge?</h2>
+      <p class="text-sky-100 text-lg mb-8 max-w-2xl mx-auto">Contact our team today to discuss your specific research requirements and how we can help you achieve your business goals.</p>
+      <a href="{{ url_for('contact') }}" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-sky-600 bg-white hover:bg-sky-50 transition-colors shadow-lg">Get Started</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

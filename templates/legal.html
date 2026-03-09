@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white min-h-screen py-16">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-bold text-slate-900 mb-8">{{ legal.title }}</h1>
+    <div class="prose prose-slate max-w-none">
+      {% for section in legal.sections %}
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold text-slate-900 mb-4">{{ section.heading }}</h2>
+        <p class="text-slate-600 mb-4">{{ section.body }}</p>
+      </section>
+      {% if not loop.last %}
+      <hr class="my-12 border-slate-200" />
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

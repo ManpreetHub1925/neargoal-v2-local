@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-slate-50 min-h-screen py-16">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <div class="inline-flex items-center justify-center w-12 h-12 bg-sky-100 rounded-full text-sky-600 mb-4 font-bold">?</div>
+      <h1 class="text-3xl font-bold text-slate-900 mb-4">Frequently Asked Questions</h1>
+      <p class="text-lg text-slate-600">Common questions about our research, methodologies, and services.</p>
+    </div>
+
+    <div class="space-y-4">
+      {% for faq in faqs %}
+      <div class="bg-white rounded-xl border border-slate-200 overflow-hidden transition-all duration-200 faq-item">
+        <button type="button" class="w-full flex items-center justify-between p-6 text-left focus:outline-none faq-trigger" data-faq-trigger>
+          <span class="font-semibold text-lg {% if loop.first %}text-sky-600{% else %}text-slate-900{% endif %}">{{ faq.question }}</span>
+          <span class="faq-symbol text-slate-400">{% if loop.first %}-{% else %}+{% endif %}</span>
+        </button>
+        <div class="px-6 text-slate-600 overflow-hidden transition-all duration-300 ease-in-out faq-panel {% if not loop.first %}hidden{% endif %}">
+          <p class="leading-relaxed pb-6">{{ faq.answer }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-12 text-center">
+      <p class="text-slate-600 mb-4">Still have questions?</p>
+      <a href="{{ url_for('contact') }}" class="inline-flex items-center text-sky-600 font-semibold hover:text-sky-500">Contact our support team</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

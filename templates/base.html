@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}" />
+  </head>
+  <body class="bg-white text-slate-900">
+    <div class="min-h-screen flex flex-col bg-white font-sans text-slate-900">
+      <header id="site-header" class="fixed top-0 left-0 right-0 z-50 bg-white py-4 shadow-sm transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center">
+            <a href="{{ url_for('home') }}" class="flex flex-col items-start">
+              <img src="{{ url_for('static', filename='images/primary-logo5.png') }}" alt="Neargoal Consulting" class="w-48 md:w-56 h-auto" />
+            </a>
+
+            <nav class="hidden lg:flex items-center space-x-8">
+              <div class="relative group">
+                <a href="{{ url_for('market_intelligence') }}" class="flex items-center text-sm font-medium {% if request.path.startswith('/market-intelligence') %}text-sky-600{% else %}text-slate-700 hover:text-sky-600{% endif %} transition-colors py-2">
+                  Market Intelligence
+                  
+                </a>
+                <div class="absolute left-0 mt-0 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 bg-white border border-slate-100 shadow-xl rounded-lg overflow-hidden z-50">
+                  <div class="py-1">
+                    {% for item in nav_industries %}
+                    <a href="{{ url_for('industry_detail', industry_slug=item.slug) }}" class="block px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-sky-600 border-l-2 border-transparent hover:border-sky-500 transition-colors">{{ item.name }}</a>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="relative group">
+                <a href="{{ url_for('consulting') }}" class="flex items-center text-sm font-medium {% if request.path.startswith('/consulting') %}text-sky-600{% else %}text-slate-700 hover:text-sky-600{% endif %} transition-colors py-2">
+                  Consulting & Advisory
+                  
+                </a>
+                <div class="absolute left-0 mt-0 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 bg-white border border-slate-100 shadow-xl rounded-lg overflow-hidden z-50">
+                  <div class="py-1">
+                    {% for item in nav_services %}
+                    <a href="{{ url_for('consulting_detail', slug=item.slug) }}" class="block px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-sky-600 border-l-2 border-transparent hover:border-sky-500 transition-colors">{{ item.name }}</a>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="relative group">
+                <a href="{{ url_for('market_updates') }}" class="flex items-center text-sm font-medium {% if request.path.startswith('/market-updates') or request.path.startswith('/updates') %}text-sky-600{% else %}text-slate-700 hover:text-sky-600{% endif %} transition-colors py-2">
+                  Market Updates
+                  
+                </a>
+                <div class="absolute left-0 mt-0 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 bg-white border border-slate-100 shadow-xl rounded-lg overflow-hidden z-50">
+                  <div class="py-1">
+                    {% for item in nav_update_categories %}
+                    <a href="{{ item.href }}" class="block px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-sky-600 border-l-2 border-transparent hover:border-sky-500 transition-colors">{{ item.name }}</a>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <a href="{{ url_for('contact') }}" class="text-sm font-medium {% if request.path.startswith('/contact') %}text-sky-600{% else %}text-slate-700 hover:text-sky-600{% endif %} transition-colors py-2">Contact Us</a>
+              <button type="button" class="p-2 text-slate-500 hover:text-sky-600 transition-colors" data-search-toggle aria-label="Open search">
+                <i data-lucide="search" class="w-5 h-5"></i>
+              </button>
+            </nav>
+
+            <button class="lg:hidden p-2 text-slate-600" type="button" data-mobile-menu-toggle aria-label="Toggle navigation">
+              <i data-lucide="menu" class="w-6 h-6 mobile-menu-open-icon"></i>
+              <i data-lucide="x" class="w-6 h-6 mobile-menu-close-icon hidden"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="search-overlay" class="hidden absolute top-full left-0 right-0 bg-white border-t border-slate-100 shadow-lg p-4">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <form action="{{ url_for('market_intelligence') }}" method="get" class="relative">
+              <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+              <input type="text" name="search" placeholder="Search reports, insights, and more..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all" data-search-input />
+            </form>
+          </div>
+        </div>
+
+        {% if breadcrumbs %}
+        <div class="bg-slate-50 border-b border-slate-200">
+          <nav aria-label="Breadcrumb" class="bg-slate-50 border-b border-slate-200 py-2 px-4 md:px-8">
+            <ol class="flex items-center space-x-2 text-sm text-slate-500 flex-wrap">
+              {% for crumb in breadcrumbs %}
+              <li class="flex items-center">
+                {% if not loop.first %}
+                <i data-lucide="chevron-right" class="w-4 h-4 mx-1 text-slate-400 flex-shrink-0"></i>
+                {% endif %}
+                {% if crumb.current %}
+                <span class="font-medium text-sky-600 line-clamp-1" aria-current="page">{{ crumb.label }}</span>
+                {% elif crumb.href %}
+                <a href="{{ crumb.href }}" class="hover:text-sky-600 transition-colors line-clamp-1">{{ crumb.label }}</a>
+                {% else %}
+                <span class="line-clamp-1">{{ crumb.label }}</span>
+                {% endif %}
+              </li>
+              {% endfor %}
+            </ol>
+          </nav>
+        </div>
+        {% endif %}
+      </header>
+
+      <div id="mobile-menu" class="hidden fixed inset-0 z-40 bg-white pt-24 px-4 pb-8 overflow-y-auto lg:hidden">
+        <div class="flex flex-col space-y-4">
+          <div class="border-b border-slate-100 pb-2">
+            <div class="flex justify-between items-center">
+              <a href="{{ url_for('market_intelligence') }}" class="text-lg font-medium text-slate-900" data-mobile-link>Market Intelligence</a>
+              <button type="button" class="p-2" data-mobile-submenu-toggle="mobile-market-intelligence" aria-label="Toggle Market Intelligence submenu">
+                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+              </button>
+            </div>
+            <div id="mobile-market-intelligence" class="hidden ml-4 mt-2 flex flex-col space-y-2">
+              {% for item in nav_industries %}
+              <a href="{{ url_for('industry_detail', industry_slug=item.slug) }}" class="text-sm text-slate-600 py-1" data-mobile-link>{{ item.name }}</a>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="border-b border-slate-100 pb-2">
+            <div class="flex justify-between items-center">
+              <a href="{{ url_for('consulting') }}" class="text-lg font-medium text-slate-900" data-mobile-link>Consulting & Advisory</a>
+              <button type="button" class="p-2" data-mobile-submenu-toggle="mobile-consulting" aria-label="Toggle Consulting submenu">
+                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+              </button>
+            </div>
+            <div id="mobile-consulting" class="hidden ml-4 mt-2 flex flex-col space-y-2">
+              {% for item in nav_services %}
+              <a href="{{ url_for('consulting_detail', slug=item.slug) }}" class="text-sm text-slate-600 py-1" data-mobile-link>{{ item.name }}</a>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="border-b border-slate-100 pb-2">
+            <div class="flex justify-between items-center">
+              <a href="{{ url_for('market_updates') }}" class="text-lg font-medium text-slate-900" data-mobile-link>Market Updates</a>
+              <button type="button" class="p-2" data-mobile-submenu-toggle="mobile-updates" aria-label="Toggle Market Updates submenu">
+                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+              </button>
+            </div>
+            <div id="mobile-updates" class="hidden ml-4 mt-2 flex flex-col space-y-2">
+              {% for item in nav_update_categories %}
+              <a href="{{ item.href }}" class="text-sm text-slate-600 py-1" data-mobile-link>{{ item.name }}</a>
+              {% endfor %}
+            </div>
+          </div>
+
+          <a href="{{ url_for('contact') }}" class="text-lg font-medium text-slate-900 border-b border-slate-100 pb-4" data-mobile-link>Contact Us</a>
+        </div>
+      </div>
+
+      <div id="page-offset"></div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-stack fixed top-24 right-4 space-y-3 max-w-sm">
+        {% for category, message in messages %}
+        <div class="rounded-lg shadow-lg border px-4 py-3 text-sm flash-message {% if category == 'success' %}bg-green-50 border-green-200 text-green-800{% elif category == 'error' %}bg-red-50 border-red-200 text-red-800{% elif category == 'info' %}bg-sky-50 border-sky-200 text-sky-800{% else %}bg-white border-slate-200 text-slate-800{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <main class="flex-grow">
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="bg-slate-900 text-white pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            <div>
+              <img src="{{ url_for('static', filename='images/primary-logo5.png') }}" alt="Neargoal Consulting" class="w-48 h-auto mb-6 brightness-0 invert" />
+              <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                Neargoal Consulting delivers deep, analyst-driven market research and strategic intelligence across high-impact global industries.
+              </p>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-semibold mb-4 text-white">Quick Links</h3>
+              <ul class="space-y-2 text-sm text-slate-400">
+                <li><a href="{{ url_for('about') }}" class="hover:text-sky-400 transition-colors">About Us</a></li>
+                <li><a href="{{ url_for('market_intelligence') }}" class="hover:text-sky-400 transition-colors">Market Intelligence</a></li>
+                <li><a href="{{ url_for('consulting') }}" class="hover:text-sky-400 transition-colors">Consulting Services</a></li>
+                <li><a href="{{ url_for('careers') }}" class="hover:text-sky-400 transition-colors">Careers</a></li>
+                <li><a href="{{ url_for('contact') }}" class="hover:text-sky-400 transition-colors">Contact Us</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-semibold mb-4 text-white">Industries</h3>
+              <ul class="space-y-2 text-sm text-slate-400">
+                {% for item in nav_industries %}
+                <li><a href="{{ url_for('industry_detail', industry_slug=item.slug) }}" class="hover:text-sky-400 transition-colors">{{ item.name }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-semibold mb-4 text-white">Contact Us</h3>
+              <ul class="space-y-2 text-sm text-slate-400 allow-copy">
+                <li>Email: info@neargoal.com</li>
+                <li>Phone: +1 (555) 123-4567</li>
+              </ul>
+              <h3 class="text-lg font-semibold mb-4 text-white mt-6">Newsletter</h3>
+              <p class="text-slate-400 text-sm mb-4">Subscribe to get the latest market insights and updates.</p>
+              <form action="{{ url_for('newsletter') }}" method="post" class="space-y-2">
+                <input type="hidden" name="redirect_to" value="{{ request.full_path if request.query_string else request.path }}" />
+                <input type="email" name="email" placeholder="Your email address" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" required />
+                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-md transition-colors text-xs font-medium uppercase tracking-wider">
+                  Subscribe
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
+            <p>&copy; {{ current_year }} Neargoal Consulting. All rights reserved.</p>
+            <div class="flex space-x-6 mt-4 md:mt-0">
+              <a href="/privacy-policy" class="hover:text-slate-300 transition-colors">Privacy Policy</a>
+              <a href="/terms" class="hover:text-slate-300 transition-colors">Terms & Conditions</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      <a href="https://wa.me/15551234567?text=Hello%21%20I%20would%20like%20to%20know%20more%20about%20your%20services." target="_blank" rel="noopener noreferrer" class="whatsapp-fab fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-colors text-white font-bold" aria-label="Chat on WhatsApp">
+        <i data-lucide="message-circle" class="w-7 h-7"></i>
+      </a>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/vendor/lucide.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  </body>
+</html>
