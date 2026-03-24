@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" href="" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+
+    <title>Dashboard</title>
+
+    {% include 'admin/head_foot/style.html' %}
+
+</head>
+
+<body>
+    <div id="app">
+        <div class="main-wrapper">
+
+            <div class="navbar-bg"></div>
+
+            {% include 'admin/head_foot/head.html' %}
+
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header">
+                        <h1>Create Post</h1>
+                        <div class="section-header-breadcrumb">
+                            <div class="breadcrumb mb-0">
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                                </div>
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.blogs') }}">Blog
+                                        List</a></div>
+                                <div class="breadcrumb-item active" aria-current="page">Create Post</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="mt-4 row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between">
+                                        <h4>Create Post</h4>
+                                        <div>
+                                            <a href="{{ url_for('admin.blogs') }}" class="btn btn-primary"><i
+                                                    class="fa fa-arrow-left"></i> Back</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body">
+
+
+                                        <form action="{{ url_for('admin.create_blog') }}" method="POST"
+                                            enctype="multipart/form-data" class="blog-form">
+
+                                            <div class="row">
+
+                                                <!-- ================= LEFT COLUMN ================= -->
+                                                <div class="col-md-8">
+
+                                                    <!-- TITLE -->
+                                                    <div class="form-group">
+                                                        <label>Post Title <span class="text-danger">*</span></label>
+                                                        <input type="text" id="title" name="title" class="form-control"
+                                                            placeholder="Enter post title" required>
+                                                    </div>
+
+                                                    <!-- SLUG -->
+                                                    <div class="form-group">
+                                                        <label>URL Slug <span class="text-danger">*</span></label>
+                                                        <input type="text" id="slug" name="slug" class="form-control"
+                                                            placeholder="post-url-slug" required>
+                                                    </div>
+
+                                                    <!-- SHORT DESCRIPTION -->
+                                                    <div class="form-group">
+                                                        <label>Short Description</label>
+                                                        <textarea name="sort_description" class="form-control" rows="3"
+                                                            placeholder="Brief summary for previews"></textarea>
+                                                    </div>
+
+                                                    <!-- CONTENT (QUILL) -->
+                                                    <div class="form-group">
+                                                        <label>Post Content <span class="text-danger">*</span></label>
+
+                                                        <div id="editor-toolbar">
+                                                            <select class="ql-header">
+                                                                <option selected></option>
+                                                                <option value="1"></option>
+                                                                <option value="2"></option>
+                                                            </select>
+                                                            <button class="ql-bold"></button>
+                                                            <button class="ql-italic"></button>
+                                                            <button class="ql-link"></button>
+                                                            <button class="ql-list" value="ordered"></button>
+                                                            <button class="ql-list" value="bullet"></button>
+                                                            <button class="ql-blockquote"></button>
+                                                            <button class="ql-undo"></button>
+                                                            <button class="ql-redo"></button>
+                                                        </div>
+
+                                                        <div id="editor" style="height:300px;"></div>
+                                                        <input type="hidden" name="description" id="content">
+                                                    </div>
+
+                                                </div>
+
+                                                <!-- ================= RIGHT COLUMN ================= -->
+                                                <div class="col-md-4">
+
+                                                    <!-- FEATURED IMAGE -->
+                                                    <div class="form-group">
+                                                        <label>Featured Image</label>
+                                                        <div id="image-preview" class="image-preview">
+                                                            <label for="image-upload" id="image-label">Upload
+                                                                Image</label>
+                                                            <input type="file" id="image-upload" name="image"
+                                                                accept="image/*">
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- CATEGORY -->
+                                                    <div class="form-group">
+                                                        <label>Category <span class="text-danger">*</span></label>
+                                                        <select name="blog_category_id" class="form-control select2"
+                                                            required>
+                                                            <option value="">Select Category</option>
+                                                            {% for cat in categories %}
+                                                            <option value="{{ cat.id }}" {% if selected_category_id and selected_category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- TAGS -->
+                                                    <div class="form-group">
+                                                        <label>Tags</label>
+                                                        <input type="text" name="tags" class="form-control"
+                                                            placeholder="Comma separated tags">
+                                                    </div>
+
+                                                    <!-- SEO -->
+                                                    <div class="form-group">
+                                                        <label>SEO Title</label>
+                                                        <input type="text" name="seo_title" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>SEO Keywords</label>
+                                                        <input type="text" name="seo_keywords" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>SEO Description</label>
+                                                        <textarea name="seo_description" class="form-control" rows="3"
+                                                            maxlength="5000"></textarea>
+                                                    </div>
+
+                                                    <!-- SWITCHES -->
+                                                    <div class="form-group">
+                                                        <label class="d-flex align-items-center mb-2">
+                                                            <input type="hidden" name="show_homepage" value="0">
+                                                            <input type="checkbox" name="show_homepage" value="1"
+                                                                class="custom-switch-input">
+                                                            <span class="custom-switch-indicator"></span>
+                                                            <span class="custom-switch-description">Show on
+                                                                homepage</span>
+                                                        </label>
+
+                                                        <label class="d-flex align-items-center mb-2">
+                                                            <input type="hidden" name="is_popular" value="0">
+                                                            <input type="checkbox" name="is_popular" value="1"
+                                                                class="custom-switch-input">
+                                                            <span class="custom-switch-indicator"></span>
+                                                            <span class="custom-switch-description">Mark as
+                                                                popular</span>
+                                                        </label>
+
+                                                        <label class="d-flex align-items-center">
+                                                            <input type="hidden" name="status" value="0">
+                                                            <input type="checkbox" name="status" value="1"
+                                                                class="custom-switch-input" checked>
+                                                            <span class="custom-switch-indicator"></span>
+                                                            <span class="custom-switch-description">Active</span>
+                                                        </label>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <!-- ACTIONS -->
+                                            <div class="mt-3">
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="fa fa-save"></i> Save
+                                                </button>
+                                                <a href="{{ url_for('admin.blogs') }}" class="btn btn-text">Cancel</a>
+                                            </div>
+
+                                        </form>
+
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+
+
+            {% include 'admin/head_foot/script.html' %}
+
+
+            <script>
+                // SLUG AUTO
+                document.getElementById('title').addEventListener('keyup', e => {
+                    document.getElementById('slug').value =
+                        e.target.value.toLowerCase().replace(/[^\w ]+/g, '').replace(/ +/g, '-');
+                });
+            </script>
+
+            <script>
+                // FEATURED IMAGE PREVIEW
+                document.getElementById('image-upload').addEventListener('change', e => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        document.getElementById('image-preview').style.backgroundImage =
+                            `url('${ev.target.result}')`;
+                        document.getElementById('image-label').innerText = 'Change Image';
+                    };
+                    reader.readAsDataURL(file);
+                });
+            </script>
+
+            <script>
+                const quill = new Quill('#editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: {
+                            container: '#editor-toolbar',
+                            handlers: {
+                                image: imageHandler
+                            }
+                        }
+                    }
+                });
+
+                function imageHandler() {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.click();
+
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        const formData = new FormData();
+                        formData.append('editor_image', file);
+
+                        const res = await fetch("{{ url_for('admin.create_blog') }}", {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await res.json();
+                        const range = quill.getSelection();
+                        quill.insertEmbed(range.index, 'image', data.url);
+                    };
+                }
+
+                // Sync content on submit
+                document.querySelector('form').addEventListener('submit', () => {
+                    document.getElementById('content').value = quill.root.innerHTML;
+                });
+            </script>
+
+
+
+</body>
+
+</html>

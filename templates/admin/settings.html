@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" href="" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+
+    <title>Dashboard</title>
+
+    {% include 'admin/head_foot/style.html' %}
+
+</head>
+
+<body>
+    <div id="app">
+        <div class="main-wrapper">
+
+            <div class="navbar-bg"></div>
+
+            {% include 'admin/head_foot/head.html' %}
+
+
+
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header">
+                        <h1>Settings</h1>
+                        <div class="section-header-breadcrumb">
+                            <div class="breadcrumb mb-0">
+                                <div class="breadcrumb-item"><a
+                                        href="{{ url_for('admin.dashboard') }}">Dashboard</a></div>
+                                <div class="breadcrumb-item active" aria-current="page">Settings</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="row">
+    
+                            <div class="col-lg-6">
+                                <div class="card card-large-icons">
+                                    <div class="text-white card-icon bg-primary">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4>Email Configuration</h4>
+                                        <a href="{{ url_for('admin.email_config') }}"
+                                            class="card-cta">Change Setting <i class="fas fa-chevron-right"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="card card-large-icons">
+                                    <div class="text-white card-icon bg-primary">
+                                        <i class="fas fa-key"></i>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4>Credential Settings</h4>
+                                        <a href="{{ url_for('admin.credential_settings') }}"
+                                            class="card-cta">Change Setting <i class="fas fa-chevron-right"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="card card-large-icons">
+                                    <div class="card-icon bg-primary text-white">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4>Payment Gateway</h4>
+                                        <a href="{{ url_for('admin.payment_gateway') }}"
+                                            class="card-cta">Change Setting <i class="fas fa-chevron-right"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="card card-large-icons">
+                                    <div class="card-icon bg-primary text-white">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4>Admin &amp; Roles</h4>
+                                        <a href="{{ url_for('admin.manage_logins') }}" class="card-cta">Change
+                                            Setting
+                                            <i class="fas fa-chevron-right"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card card-large-icons">
+                                    <div class="card-icon bg-primary text-white">
+                                        <i class="fas fa-sliders-h"></i>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4>Website Form Controls</h4>
+                                        <a href="{{ url_for('admin.form_controls') }}" class="card-cta">Change Setting <i class="fas fa-chevron-right"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+
+   
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+
+
+    {% include 'admin/head_foot/script.html' %}
+
+</body>
+
+</html>

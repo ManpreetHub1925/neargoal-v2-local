@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Report Orders - Neargoal Consulting</title>
+    {% include 'admin/head_foot/style.html' %}
+    <style>
+        .section-body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+            border-collapse: collapse;
+        }
+        .table th {
+            white-space: nowrap;
+            background: #4361ee !important;
+            font-weight: 700;
+            color: #ffffff !important;
+            padding: 15px 10px;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+        .table td {
+            padding: 12px 10px;
+            vertical-align: middle;
+        }
+        .status-badge {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .payment-paid { background: #00ab66; color: #ffffff; }
+        .payment-pending { background: #ff9f1c; color: #ffffff; }
+        .payment-failed { background: #ef233c; color: #ffffff; }
+        
+        .order-completed { background: #4361ee; color: #ffffff; }
+        .order-processing { background: #00b4d8; color: #ffffff; }
+        .order-cancelled { background: #6c757d; color: #ffffff; }
+        
+        .access-granted { background: #00ab66; color: #ffffff; }
+        .access-locked { background: #ef233c; color: #ffffff; }
+        
+        .table-order-info { min-width: 120px; }
+        .table-order-info code { font-size: 11px; font-weight: 700; }
+        
+        .table-customer-info { min-width: 220px; }
+        .table-customer-info small { color: #666; line-height: 1.4; }
+        
+        .table-report-info { min-width: 250px; }
+        .table-report-info .report-title { font-weight: 600; color: #333; line-height: 1.3; margin-bottom: 5px; }
+        
+        .table-financials { min-width: 140px; }
+        .table-gateway { min-width: 150px; }
+        
+        .table-actions { min-width: 240px; }
+        .table-actions form { background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px solid #eee; }
+        .table-actions .input-group { flex-wrap: nowrap !important; }
+        .table-actions .input-group-prepend { width: 80px; flex-shrink: 0; }
+        .table-actions .input-group-text { width: 100%; justify-content: center; background: #edeff2; font-weight: 600; color: #495057; border-right: 0; }
+/* Adjusted height, font-size, and padding so the text doesn't clip */
+        .table-actions .form-control-sm { 
+            height: 32px !important; 
+            padding: 4px 10px !important;
+            font-size: 12px; 
+            flex-grow: 1; 
+            line-height: 1.5;
+        }
+        /* Ensures dropdowns have enough room and render the arrow properly */
+        .table-actions select.form-control { 
+            min-width: 120px !important; 
+            appearance: auto;
+        }
+        .table-actions .btn-update { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 8px; margin-top: 5px; }
+        
+        .table-timeline { min-width: 130px; }
+        
+        /* Fix for overlapping on smaller screens */
+        @media (max-width: 1200px) {
+            .table-responsive {
+                border: 0;
+            }
+        }
+        
+        .text-truncate-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="main-wrapper">
+        <div class="navbar-bg"></div>
+        {% include 'admin/head_foot/head.html' %}
+        <div class="main-content">
+            <section class="section">
+                <div class="section-header">
+                    <h1>Report Orders</h1>
+                    <div class="section-header-breadcrumb">
+                        <div class="breadcrumb-item active"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></div>
+                        <div class="breadcrumb-item">Report Orders</div>
+                    </div>
+                </div>
+                
+                <div class="section-body">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Recent Orders</h4>
+                        </div>
+                        <div class="card-body p-0 table-responsive">
+                            <table class="table table-striped table-md align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Order Ref</th>
+                                        <th>Customer Details</th>
+                                        <th>Report</th>
+                                        <th>Financials</th>
+                                        <th>Gateway Info</th>
+                                        <th>Status & Actions</th>
+                                        <th>Timeline</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for row in orders %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td class="table-order-info">
+                                        <code class="text-primary d-block mb-1">{{ row.order_ref }}</code>
+                                        <div class="text-muted" style="font-size: 10px;">
+                                            <div>User ID: {{ row.user_id }}</div>
+                                            <div>Mode: <span class="badge badge-light p-1">{{ row.delivery_mode or 'Email' }}</span></div>
+                                        </div>
+                                    </td>
+                                    <td class="table-customer-info">
+                                        <div class="font-weight-bold">{{ row.customer_name or '-' }}</div>
+                                        <small class="d-block"><i class="fas fa-envelope mr-1"></i>{{ row.customer_email or '-' }}</small>
+                                        <small class="d-block"><i class="fas fa-phone mr-1"></i>{{ row.customer_phone or '-' }}</small>
+                                        <small class="d-block text-muted">{{ row.customer_company or '-' }}{% if row.customer_designation %} | {{ row.customer_designation }}{% endif %}</small>
+                                        {% if row.gst_number %}<small class="d-block text-info">GST: {{ row.gst_number }}</small>{% endif %}
+                                        {% if row.billing_address %}
+                                        <div class="mt-1" style="max-width: 200px;">
+                                            <small class="text-muted text-truncate-2 d-block" title="{{ row.billing_address }}"><i class="fas fa-map-marker-alt mr-1"></i>{{ row.billing_address }}</small>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="table-report-info">
+                                        <div class="report-title text-wrap" style="max-width: 250px;">{{ row.report_title }}</div>
+                                        <div class="mt-1">
+                                            <span class="badge badge-info" style="font-size: 9px;">ID: {{ row.report_id or '-' }}</span>
+                                            <span class="badge badge-secondary" style="font-size: 9px;">Slug: {{ row.report_slug }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="table-financials">
+                                        <div class="text-dark font-weight-bold">{{ row.currency }} {{ '%.2f'|format(row.amount or 0) }}</div>
+                                        <div style="font-size: 10px;" class="text-muted mt-1">
+                                            <div>Base: {{ row.currency }} {{ '%.2f'|format(row.base_amount or 0) }}</div>
+                                            <div>Fee: {{ '%.2f'|format(row.gateway_charge_percent or 0) }}% ({{ row.currency }} {{ '%.2f'|format(row.gateway_charge_amount or 0) }})</div>
+                                        </div>
+                                    </td>
+                                    <td class="table-gateway">
+                                        <div style="font-size: 10px;" class="text-muted">
+                                            <div><strong>GW:</strong> {{ row.gateway or 'Direct' }}</div>
+                                            <div class="text-truncate" style="max-width: 120px;" title="{{ row.gateway_order_id }}"><strong>ORD:</strong> {{ row.gateway_order_id or '-' }}</div>
+                                            <div class="text-truncate" style="max-width: 120px;" title="{{ row.gateway_payment_id }}"><strong>PAY:</strong> {{ row.gateway_payment_id or '-' }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="table-actions">
+                                        <form method="POST" class="d-flex flex-column">
+                                            <input type="hidden" name="id" value="{{ row.id }}">
+                                            
+                                            <div class="input-group input-group-sm mb-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Payment</span>
+                                                </div>
+                                                <select name="payment_status" class="form-control form-control-sm">
+                                                    {% for p in ['pending','paid','failed','refunded'] %}
+                                                    <option value="{{ p }}" {% if row.payment_status == p %}selected{% endif %}>{{ p|capitalize }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+
+                                            <div class="input-group input-group-sm mb-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Order</span>
+                                                </div>
+                                                <select name="order_status" class="form-control form-control-sm">
+                                                    {% for s in ['initiated','processing','completed','cancelled'] %}
+                                                    <option value="{{ s }}" {% if row.order_status == s %}selected{% endif %}>{{ s|capitalize }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+
+                                            <div class="input-group input-group-sm mb-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Access</span>
+                                                </div>
+                                                <select name="access_status" class="form-control form-control-sm">
+                                                    {% for a in ['locked','granted','expired'] %}
+                                                    <option value="{{ a }}" {% if row.access_status == a %}selected{% endif %}>{{ a|capitalize }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary btn-sm btn-update">Update Status</button>
+                                        </form>
+                                        {% if row.notes %}
+                                        <div class="mt-2 p-2 bg-light rounded" style="font-size: 10px;">
+                                            <strong>Notes:</strong> {{ row.notes }}
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="table-timeline">
+                                        <div style="font-size: 10px;" class="text-muted">
+                                            <div title="Created"><i class="far fa-clock mr-1"></i>{{ row.created_at }}</div>
+                                            {% if row.updated_at %}
+                                            <div class="mt-1 text-info" title="Updated"><i class="fas fa-sync-alt mr-1"></i>{{ row.updated_at }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="8" class="text-center py-5 text-muted">No orders found in the database.</td></tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer text-right">
+                            <small class="text-muted">Showing up to 600 most recent orders.</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        {% include 'admin/head_foot/script.html' %}
+    </div>
+</div>
+</body>
+</html>

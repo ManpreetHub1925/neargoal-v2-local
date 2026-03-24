@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Home Hero Sections</title>
+    {% include 'admin/head_foot/style.html' %}
+</head>
+<body>
+<div id="app">
+    <div class="main-wrapper">
+        <div class="navbar-bg"></div>
+        {% include 'admin/head_foot/head.html' %}
+
+        <div class="main-content">
+            <section class="section">
+                <div class="section-header">
+                    <h1>Home Hero Sections</h1>
+                    <div class="section-header-breadcrumb">
+                        <div class="breadcrumb mb-0">
+                            <div class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></div>
+                            <div class="breadcrumb-item active" aria-current="page">Home Hero</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-body">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Hero Slides</h4>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#heroModal" onclick="openHeroModal()">
+                                <i class="fa fa-plus"></i> Add Hero Slide
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Slug</th>
+                                        <th>Hero Title</th>
+                                        <th>CTA</th>
+                                        <th>Banner Path</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for row in hero_rows %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td><code>{{ row.slug }}</code></td>
+                                        <td>{{ row.hero_title or '-' }}</td>
+                                        <td>{{ row.cta_text or '-' }}</td>
+                                        <td><small>{{ row.banner_svg or '-' }}</small></td>
+                                        <td>
+                                            <input type="checkbox"
+                                                   class="hero-status"
+                                                   data-id="{{ row.id }}"
+                                                   {% if row.is_active %}checked{% endif %}
+                                                   data-toggle="toggle"
+                                                   data-onstyle="success"
+                                                   data-offstyle="secondary"
+                                                   data-on="Active"
+                                                   data-off="Inactive">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#heroModal" onclick='editHero({{ row|tojson }})' title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" onclick="setDeleteUrl('{{ url_for('admin.delete_home_hero', id=row.id) }}')" title="Delete">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4">No hero slides yet.</td>
+                                    </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="modal fade" id="heroModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <form method="POST" action="{{ url_for('admin.home_hero') }}" enctype="multipart/form-data">
+                        <input type="hidden" name="id" id="hero_id">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="heroModalTitle">Add Hero Slide</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>Internal Title</label>
+                                    <input type="text" class="form-control" name="title" id="hero_title_meta" placeholder="Home Hero 1">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Hero Title *</label>
+                                    <input type="text" class="form-control" name="hero_title" id="hero_title" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Hero Subtitle</label>
+                                    <input type="text" class="form-control" name="hero_subtitle" id="hero_subtitle">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Banner Image Path</label>
+                                    <input type="text" class="form-control" name="banner_svg" id="hero_banner_svg" placeholder="assets/images/slider/slider-1.webp">
+                                    <div class="form-text">You can type a static path, choose a default image, or upload a new one.</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Choose Default Banner</label>
+                                    <select class="form-control form-select" id="hero_default_banner_select">
+                                        <option value="">Select default image</option>
+                                        <option value="assets/images/slider/slider-1.webp">Slider 1</option>
+                                        <option value="assets/images/slider/slider-2.webp">Slider 2</option>
+                                        <option value="assets/images/slider/slider-3.webp">Slider 3</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Upload Banner Image</label>
+                                    <input type="file" class="form-control" name="banner_image" id="hero_banner_file" accept="image/*">
+                                    <div class="form-text">Uploaded image will be used automatically.</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Banner Preview</label>
+                                    <div class="border rounded p-2 text-center bg-light">
+                                        <img id="hero_banner_preview" src="" alt="Banner preview" style="display:none;max-height:120px;max-width:100%;">
+                                        <small id="hero_banner_preview_empty" class="text-muted">No image selected</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>CTA Text</label>
+                                    <input type="text" class="form-control" name="cta_text" id="hero_cta_text" placeholder="Request sample report">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>CTA URL</label>
+                                    <input type="text" class="form-control" name="cta_url" id="hero_cta_url" placeholder="/contact-us">
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label>Description</label>
+                                    <div id="hero_editor_toolbar" class="mb-1">
+                                        <select class="ql-header">
+                                            <option selected></option>
+                                            <option value="1"></option>
+                                            <option value="2"></option>
+                                        </select>
+                                        <button class="ql-bold"></button>
+                                        <button class="ql-italic"></button>
+                                        <button class="ql-underline"></button>
+                                        <button class="ql-link"></button>
+                                        <button class="ql-list" value="ordered"></button>
+                                        <button class="ql-list" value="bullet"></button>
+                                        <button class="ql-blockquote"></button>
+                                        <button class="ql-undo"></button>
+                                        <button class="ql-redo"></button>
+                                        <button class="ql-clean"></button>
+                                    </div>
+                                    <div id="hero_editor"></div>
+                                    <input type="hidden" name="content" id="hero_content">
+                                </div>
+                                <div class="col-12" style="padding-top:4.5rem;">
+                                    <div class="form-check form-switch hero-active-wrap">
+                                        <input class="form-check-input" type="checkbox" value="1" name="is_active" id="hero_is_active" checked>
+                                        <label class="form-check-label">Active</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success">Save Slide</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">Delete this hero slide?</div>
+                    <div class="modal-footer">
+                        <form id="deleteForm" method="POST">
+                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% include 'admin/head_foot/script.html' %}
+        <script>
+            let heroQuill = null;
+
+            function ensureHeroQuill() {
+                if (heroQuill) return heroQuill;
+                heroQuill = new Quill('#hero_editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: {
+                            container: '#hero_editor_toolbar',
+                            handlers: {
+                                undo: function () {
+                                    this.quill.history.undo();
+                                },
+                                redo: function () {
+                                    this.quill.history.redo();
+                                }
+                            }
+                        },
+                        history: {
+                            delay: 1000,
+                            maxStack: 50,
+                            userOnly: true
+                        }
+                    }
+                });
+                return heroQuill;
+            }
+
+            ensureHeroQuill();
+
+            function openHeroModal() {
+                document.getElementById('heroModalTitle').innerText = 'Add Hero Slide';
+                document.getElementById('hero_id').value = '';
+                document.getElementById('hero_title_meta').value = '';
+                document.getElementById('hero_title').value = '';
+                document.getElementById('hero_subtitle').value = '';
+                document.getElementById('hero_banner_svg').value = '';
+                document.getElementById('hero_default_banner_select').value = '';
+                document.getElementById('hero_banner_file').value = '';
+                document.getElementById('hero_cta_text').value = '';
+                document.getElementById('hero_cta_url').value = '/contact-us';
+                document.getElementById('hero_content').value = '';
+                document.getElementById('hero_is_active').checked = true;
+                ensureHeroQuill().setContents([]);
+                updateHeroBannerPreview('');
+            }
+
+            function editHero(row) {
+                document.getElementById('heroModalTitle').innerText = 'Edit Hero Slide';
+                document.getElementById('hero_id').value = row.id || '';
+                document.getElementById('hero_title_meta').value = row.title || '';
+                document.getElementById('hero_title').value = row.hero_title || '';
+                document.getElementById('hero_subtitle').value = row.hero_subtitle || '';
+                document.getElementById('hero_banner_svg').value = row.banner_svg || '';
+                document.getElementById('hero_default_banner_select').value = '';
+                document.getElementById('hero_banner_file').value = '';
+                document.getElementById('hero_cta_text').value = row.cta_text || '';
+                document.getElementById('hero_cta_url').value = row.cta_url || '/contact-us';
+                document.getElementById('hero_content').value = row.content || '';
+                document.getElementById('hero_is_active').checked = Number(row.is_active) === 1;
+                const quill = ensureHeroQuill();
+                quill.setContents([]);
+                if (row.content) {
+                    quill.clipboard.dangerouslyPasteHTML(row.content);
+                }
+                updateHeroBannerPreview(row.banner_svg || '');
+            }
+
+            function setDeleteUrl(url) {
+                document.getElementById('deleteForm').action = url;
+            }
+
+            function updateHeroBannerPreview(pathValue) {
+                const img = document.getElementById('hero_banner_preview');
+                const empty = document.getElementById('hero_banner_preview_empty');
+                if (!pathValue) {
+                    img.style.display = 'none';
+                    img.src = '';
+                    empty.style.display = 'inline';
+                    return;
+                }
+                let src = pathValue;
+                if (!/^https?:\/\//i.test(src) && !src.startsWith('/')) {
+                    src = '/static/' + src.replace(/^\/+/, '');
+                }
+                img.src = src;
+                img.style.display = 'inline-block';
+                empty.style.display = 'none';
+            }
+
+            document.getElementById('hero_banner_svg').addEventListener('input', function () {
+                updateHeroBannerPreview(this.value.trim());
+            });
+
+            document.getElementById('hero_default_banner_select').addEventListener('change', function () {
+                if (this.value) {
+                    document.getElementById('hero_banner_svg').value = this.value;
+                    updateHeroBannerPreview(this.value);
+                }
+            });
+
+            document.getElementById('hero_banner_file').addEventListener('change', function () {
+                const file = this.files && this.files[0];
+                if (!file) {
+                    updateHeroBannerPreview(document.getElementById('hero_banner_svg').value.trim());
+                    return;
+                }
+                const tempUrl = URL.createObjectURL(file);
+                const img = document.getElementById('hero_banner_preview');
+                const empty = document.getElementById('hero_banner_preview_empty');
+                img.src = tempUrl;
+                img.style.display = 'inline-block';
+                empty.style.display = 'none';
+            });
+
+            $('.hero-status').on('change', function () {
+                const id = $(this).data('id');
+                const status = $(this).prop('checked') ? '1' : '0';
+                $.ajax({
+                    url: "{{ url_for('admin.home_hero_status', id=0) }}".replace('0', id),
+                    type: 'POST',
+                    data: {status: status},
+                    success: function(res) {
+                        if (res.success) {
+                            iziToast.success({ title: 'Success', message: 'Hero status updated', position: 'topRight' });
+                        } else {
+                            iziToast.error({ title: 'Error', message: 'Failed to update status', position: 'topRight' });
+                        }
+                    },
+                    error: function () {
+                        iziToast.error({ title: 'Error', message: 'Connection error', position: 'topRight' });
+                        window.location.reload();
+                    }
+                });
+            });
+
+            document.querySelector('#heroModal form').addEventListener('submit', function () {
+                document.getElementById('hero_content').value = ensureHeroQuill().root.innerHTML;
+            });
+        </script>
+    </div>
+</div>
+</body>
+</html>

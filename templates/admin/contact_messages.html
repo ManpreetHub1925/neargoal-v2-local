@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Contact Messages</title>
+    {% include 'admin/head_foot/style.html' %}
+</head>
+
+<body>
+    <div id="app">
+        <div class="main-wrapper">
+            <div class="navbar-bg"></div>
+            {% include 'admin/head_foot/head.html' %}
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header">
+                        <h1>Contact Messages & Inquiries</h1>
+                    </div>
+                    <div class="section-body">
+                        <div class="card">
+                            <div class="card-body table-responsive">
+                                <table class="table table-striped align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Type</th>
+                                            <th>Advisory Name</th>
+                                            <th>Source Page</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Country Code</th>
+                                            <th>Phone</th>
+                                            <th>Country</th>
+                                            <th>Company</th>
+                                            <th>Designation</th>
+                                            <th>Message</th>
+                                            <th>Received</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in messages %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+
+                                            <td><small class="badge bg-light text-dark">{{ row.inquiry_type or '-'
+                                                    }}</small></td>
+
+                                            <td>{{ row.advisory_name or '-' }}</td>
+
+                                            <td><small>{{ row.source_page or '-' }}</small></td>
+
+                                            <td>{{ row.full_name or row.name or '-' }}</td>
+
+                                            <td>{{ row.email or '-' }}</td>
+
+                                            <td>{{ row.country_code or '-' }}</td>
+
+                                            <td>{{ row.phone or '-' }}</td>
+
+                                            <td>{{ row.country or '-' }}</td>
+
+                                            <td>{{ row.company or '-' }}</td>
+
+                                            <td>{{ row.designation or '-' }}</td>
+
+                                            <td style="max-width: 400px;">
+                                                <div
+                                                    style="max-height: 150px; width: 180px; overflow-y: auto; white-space: pre-wrap; font-size: 1rem; line-height: 1.4;">
+                                                    {{ (row.message[:500] + '...') if row.message and row.message|length
+                                                    > 500 else (row.message or '-') }}
+                                                </div>
+                                            </td>
+
+                                            <td><small>{{ row.created_at or '-' }}</small></td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="13" class="text-center py-4 text-slate-500">No contact messages
+                                                found.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            {% include 'admin/head_foot/script.html' %}
+        </div>
+    </div>
+</body>
+
+</html>

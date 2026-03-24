@@ -1,0 +1,274 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        {% for category, message in messages %}
+        {% set toast_type = 'success' if category == 'success' else 'warning' if category == 'warning' else 'error' if category in ['danger', 'error'] else 'info' %}
+        iziToast.{{ toast_type }}({
+            title: "{{ category|capitalize }}",
+            message: "{{ message|escape }}",
+            position: 'topRight',
+            timeout: 4000,
+            close: true,
+            progressBar: true
+        });
+        {% endfor %}
+    });
+</script>
+{% endif %}
+{% endwith %}
+
+{% set ep = request.endpoint or '' %}
+{% set in_blog = ep in ['admin.blogs', 'admin.manage_blog_category', 'admin.create_blog', 'admin.edit_blog', 'admin.blog_preview'] %}
+{% set in_reports = ep in ['admin.manage_reports', 'admin.manage_jobs', 'admin.report_requests', 'admin.report_orders'] %}
+{% set in_newsletter = ep in ['admin.newsletter_subscriber', 'admin.send_mail_to_newsletter'] %}
+
+
+
+<nav class="navbar main-navbar px-4">
+    <div class="d-flex align-items-center w-100 justify-content-between">
+        <!-- LEFT: Hamburger -->
+        <div class="d-flex align-items-center">
+            <a href="#" data-toggle="sidebar" class="nav-link nav-link-lg">
+                <i class="fas fa-bars"></i>
+            </a>
+        </div>
+
+        <!-- RIGHT: Profile -->
+        <div class="dropdown">
+            <a href="#" data-bs-toggle="dropdown" class="nav-link dropdown-toggle d-flex align-items-center gap-2">
+                <div class="profile-img-container">
+                    <img src="{{ url_for('static', filename='admin/assets/img/user/' ~ profile.profile_image) if profile and profile.profile_image else url_for('static', filename='admin/assets/img/admin/avatar.webp') }}"
+                        class="rounded-circle" width="36" height="36" style="object-fit: cover; border: 2px solid var(--admin-border);">
+                </div>
+                <div class="d-none d-lg-block text-start">
+                    <div class="fw-bold leading-tight" style="font-size: 13px;">{{ profile.full_name if profile else 'Administrator' }}</div>
+                    <div class="text-muted" style="font-size: 11px;">Admin Account</div>
+                </div>
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2 mt-2" style="border-radius: 12px; min-width: 200px;">
+                <div class="px-4 py-2 border-bottom mb-2 d-lg-none">
+                    <div class="fw-bold">{{ profile.full_name if profile else 'Administrator' }}</div>
+                    <div class="text-muted small">Admin Account</div>
+                </div>
+                <a href="{{ url_for('admin.profile') }}" class="dropdown-item d-flex align-items-center gap-2 py-2 px-4">
+                    <i class="far fa-user text-muted"></i> <span>My Profile</span>
+                </a>
+                <a href="{{ url_for('admin.settings') }}" class="dropdown-item d-flex align-items-center gap-2 py-2 px-4">
+                    <i class="fas fa-cog text-muted"></i> <span>Settings</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="{{ url_for('admin.logout') }}" class="dropdown-item logout-button d-flex align-items-center gap-2 py-2 px-4 text-danger">
+                    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+
+<div class="main-sidebar">
+    <aside id="sidebar-wrapper">
+        <div class="sidebar-brand">
+            <a href="{{ url_for('admin.dashboard') }}">
+                <img src="{{ url_for('static', filename='images/primary-logo5.png') }}" alt="Neargoal">
+            </a>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="menu-header">Main</li>
+            <li class="{{ 'active' if ep == 'admin.dashboard' else '' }}">
+                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                    <i class="fas fa-columns"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <li class="menu-header">Market Intelligence</li>
+            <li class="nav-item dropdown {{ 'active' if in_reports else '' }}">
+                <a href="javascript:void(0)" class="nav-link has-dropdown">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Reports & Sales</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li class="{{ 'active' if ep == 'admin.manage_reports' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.manage_reports') }}">Reports List</a>
+                    </li>
+                    <li class="{{ 'active' if ep == 'admin.report_requests' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.report_requests') }}">Report Requests</a>
+                    </li>
+                    <li class="{{ 'active' if ep == 'admin.report_orders' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.report_orders') }}">Report Orders</a>
+                    </li>
+
+                </ul>
+            </li>
+
+            <li class="nav-item dropdown {{ 'active' if ep in ['admin.manage_services', 'admin.service_taxonomy'] else '' }}">
+                <a href="javascript:void(0)" class="nav-link has-dropdown">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Consulting</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li class="{{ 'active' if ep == 'admin.manage_services' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.manage_services') }}">Manage Services</a>
+                    </li>
+                    <li class="{{ 'active' if ep == 'admin.service_taxonomy' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.service_taxonomy') }}">Service Taxonomy</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="menu-header">Content</li>
+            <li class="nav-item dropdown {{ 'active' if (in_blog and request.args.get('category_slug') not in ['corporate-developments', 'press-releases']) else '' }}">
+                <a href="javascript:void(0)" class="nav-link has-dropdown">
+                    <i class="fas fa-pen-fancy"></i>
+                    <span>Blog Management</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li class="{{ 'active' if (ep == 'admin.blogs' and not request.args.get('category_slug')) else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.blogs') }}">All Posts</a>
+                    </li>
+                    <li class="{{ 'active' if (ep == 'admin.blogs' and request.args.get('category_slug') == 'insights') else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.blogs', category_slug='insights') }}">Insights</a>
+                    </li>
+                    <li class="{{ 'active' if (ep == 'admin.blogs' and request.args.get('category_slug') == 'case-studies') else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.blogs', category_slug='case-studies') }}">Case Studies</a>
+                    </li>
+                    <li class="{{ 'active' if ep == 'admin.manage_blog_category' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.manage_blog_category') }}">Blog Categories</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-item dropdown {{ 'active' if (ep == 'admin.blogs' and request.args.get('category_slug') in ['corporate-developments', 'press-releases']) else '' }}">
+                <a href="javascript:void(0)" class="nav-link has-dropdown">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>Market Updates</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li class="{{ 'active' if (ep == 'admin.blogs' and request.args.get('category_slug') == 'corporate-developments') else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.blogs', category_slug='corporate-developments') }}">Corporate Developments</a>
+                    </li>
+                    <li class="{{ 'active' if (ep == 'admin.blogs' and request.args.get('category_slug') == 'press-releases') else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.blogs', category_slug='press-releases') }}">Press Releases</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="{{ 'active' if ep == 'admin.manage_jobs' else '' }}">
+                <a class="nav-link" href="{{ url_for('admin.manage_jobs') }}">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Careers</span>
+                </a>
+            </li>
+
+            <li class="{{ 'active' if ep == 'admin.landing_pages_list' else '' }}">
+                <a class="nav-link" href="{{ url_for('admin.landing_pages_list') }}">
+                    <i class="fas fa-laptop-code"></i>
+                    <span>Landing Pages</span>
+                </a>
+            </li>
+
+            <li class="{{ 'active' if ep == 'admin.manage_team' else '' }}">
+                <a class="nav-link" href="{{ url_for('admin.manage_team') }}">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Team</span>
+                </a>
+            </li>
+
+            <li class="menu-header">Site Components</li>
+            <li class="{{ 'active' if ep == 'admin.home_hero' else '' }}">
+                <a class="nav-link" href="{{ url_for('admin.home_hero') }}">
+                    <i class="fas fa-images"></i>
+                    <span>Hero Sections</span>
+                </a>
+            </li>
+
+            <li class="{{ 'active' if ep == 'admin.faqs' else '' }}">
+                <a class="nav-link" href="{{ url_for('admin.faqs') }}">
+                    <i class="fas fa-question-circle"></i>
+                    <span>FAQs</span>
+                </a>
+            </li>
+
+            <li class="{{ 'active' if ep == 'admin.award_section' else '' }}">
+                <a class="nav-link" href="{{ url_for('admin.award_section') }}">
+                    <i class="fas fa-award"></i>
+                    <span>Awards</span>
+                </a>
+            </li>
+
+            <li class="menu-header">Communication</li>
+            <li class="{{ 'active' if ep == 'admin.contact_messages' else '' }}">
+                <a class="nav-link" href="{{ url_for('admin.contact_messages') }}">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <span>Contact Messages</span>
+                </a>
+            </li>
+
+            <li class="nav-item dropdown {{ 'active' if in_newsletter else '' }}">
+                <a href="javascript:void(0)" class="nav-link has-dropdown">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Newsletter</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li class="{{ 'active' if ep == 'admin.newsletter_subscriber' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.newsletter_subscriber') }}">Subscribers</a>
+                    </li>
+                    <li class="{{ 'active' if ep == 'admin.send_mail_to_newsletter' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.send_mail_to_newsletter') }}">Send Bulk Mail</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="menu-header">System</li>
+            <li class="{{ 'active' if ep == 'admin.settings' else '' }}">
+                <a class="nav-link" href="{{ url_for('admin.settings') }}">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a href="javascript:void(0)" class="nav-link has-dropdown">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Security</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li class="{{ 'active' if ep == 'admin.manage_logins' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.manage_logins') }}">User Accounts</a>
+                    </li>
+                    <li class="{{ 'active' if ep == 'admin.credential_settings' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.credential_settings') }}">API Credentials</a>
+                    </li>
+                    <li class="{{ 'active' if ep == 'admin.payment_gateway' else '' }}">
+                        <a class="nav-link" href="{{ url_for('admin.payment_gateway') }}">Payment Gateways</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="mt-4">
+                <a class="nav-link text-primary" href="{{ url_for('home') }}" target="_blank">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>View Live Site</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer p-3 mt-4 border-top">
+            <div class="d-flex align-items-center gap-3 px-3">
+                <img src="{{ url_for('static', filename='admin/assets/img/admin/avatar.webp') }}" class="rounded-circle border" width="32" height="32">
+                <div class="flex-grow-1 min-w-0">
+                    <div class="fw-bold text-dark text-truncate" style="font-size: 13px;">{{ profile.full_name if profile else 'Administrator' }}</div>
+                    <div class="text-muted text-truncate" style="font-size: 11px;">Admin</div>
+                </div>
+                <a href="{{ url_for('admin.logout') }}" class="text-danger" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+</div>

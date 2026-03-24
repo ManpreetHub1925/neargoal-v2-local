@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Manage Reports</title>
+    {% include 'admin/head_foot/style.html' %}
+    <style>
+        .report-editor { 
+            min-height: 160px;
+            border: 1px solid #dcdde0;
+            border-radius: 4px;
+            background: white;
+        }
+        
+        /* Modal size adjustments */
+        #reportModal .modal-dialog {
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+        
+        #reportModal .modal-content {
+            max-height: calc(100vh - 100px);
+            border-radius: 0;
+        }
+        
+        #reportModal .modal-body {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            background: white;
+        }
+        
+        /* Form styling to match create_blog.html */
+        #reportModal .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        #reportModal .form-group label {
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        #reportModal .form-control,
+        #reportModal .form-select {
+            border-color: #dcdde0;
+            font-size: 14px;
+            height: 40px;
+            padding: 8px 12px;
+            background: white;
+        }
+        
+        #reportModal .form-control:focus,
+        #reportModal .form-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            background: white;
+        }
+        
+        #reportModal .input-group-text {
+            background: #f5f7f9;
+            border-color: #dcdde0;
+            color: #666;
+        }
+        
+        /* Quill editor styling - CRITICAL FIXES */
+        #reportModal .ql-toolbar {
+            background: #f5f7f9;
+            border: 1px solid #dcdde0;
+            border-radius: 4px 4px 0 0;
+            padding: 8px;
+            z-index: 1100 !important;
+            position: relative;
+        }
+        
+        #reportModal .ql-toolbar.ql-snow {
+            padding: 8px;
+        }
+        
+        #reportModal .ql-container {
+            border: 1px solid #dcdde0;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            font-size: 14px;
+            background: white !important;
+            z-index: 1000 !important;
+        }
+        
+        #reportModal .ql-editor {
+            min-height: 160px;
+            background: white !important;
+            color: #333;
+        }
+        
+        #reportModal .ql-editor.ql-blank::before {
+            color: #999;
+        }
+
+        /* Keep Quill controls usable inside the report modal without disabling modal scrolling */
+        #reportModal .ql-toolbar {
+            z-index: 1100 !important;
+            position: relative;
+            display: flex !important;
+            flex-wrap: wrap;
+        }
+        
+        #reportModal .ql-container {
+            z-index: 1000 !important;
+        }
+
+        /* Ensure toolbar buttons display properly */
+        #reportModal .ql-toolbar button,
+        #reportModal .ql-toolbar button:hover,
+        #reportModal .ql-toolbar button.ql-active,
+        #reportModal .ql-toolbar select {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #reportModal .ql-toolbar .ql-formats {
+            display: flex !important;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        /* Form check styling */
+        #reportModal .form-check {
+            padding-left: 0;
+        }
+        
+        #reportModal .form-check-input {
+            margin-top: 0.35rem;
+            margin-right: 8px;
+        }
+        
+        #reportModal .form-check-label {
+            margin-bottom: 0;
+            color: #333;
+        }
+
+
+        .report-editor { 
+            min-height: 160px;
+            border: 1px solid #dcdde0;
+            border-radius: 4px;
+            background: white;
+        }
+
+        #reportModal .ql-editor {
+            min-height: 250px;
+        }
+
+        .report-faqs-wrap .faq-item {
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .report-faqs-wrap .remove-faq {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="main-wrapper">
+        <div class="navbar-bg"></div>
+        {% include 'admin/head_foot/head.html' %}
+        <div class="main-content">
+            <section class="section">
+                <div class="section-header">
+                    <h1>Manage Reports</h1>
+                </div>
+                <div class="section-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="card card-statistic-1 mb-0">
+                                <div class="card-icon bg-primary"><i class="fas fa-file-alt"></i></div>
+                                <div class="card-wrap">
+                                    <div class="card-header"><h4>Total Reports</h4></div>
+                                    <div class="card-body">{{ total_reports or 0 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card card-statistic-1 mb-0">
+                                <div class="card-icon bg-success"><i class="fas fa-check-circle"></i></div>
+                                <div class="card-wrap">
+                                    <div class="card-header"><h4>Active</h4></div>
+                                    <div class="card-body">{{ active_reports or 0 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card card-statistic-1 mb-0">
+                                <div class="card-icon bg-secondary"><i class="fas fa-pause-circle"></i></div>
+                                <div class="card-wrap">
+                                    <div class="card-header"><h4>Inactive</h4></div>
+                                    <div class="card-body">{{ inactive_reports or 0 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Reports</h4>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('admin.service_taxonomy') }}" class="btn btn-outline-dark">
+                                    <i class="fa fa-sitemap"></i> Manage Segments
+                                </a>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reportModal" onclick="openReportModal()">
+                                    <i class="fa fa-plus"></i> Add Report
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body border-bottom">
+                            <form method="GET" action="{{ url_for('admin.manage_reports') }}" class="row g-2">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="q" value="{{ q or '' }}" placeholder="Search by title, slug or excerpt">
+                                </div>
+                                <div class="col-md-4">
+                                    <select name="industry" class="form-select">
+                                        <option value="">All segments</option>
+                                        {% for option in industry_options %}
+                                        <option value="{{ option.slug }}" {% if selected_industry == option.slug %}selected{% endif %}>{{ option.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select name="status" class="form-select">
+                                        <option value="">All status</option>
+                                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
+                                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1 d-grid">
+                                    <button class="btn btn-outline-primary" type="submit">Filter</button>
+                                </div>
+                                <div class="col-md-1 d-grid">
+                                    <a class="btn btn-light" href="{{ url_for('admin.manage_reports') }}">Reset</a>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table class="table table-striped align-middle">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Report ID</th>
+                                    <th>Title</th>
+                                    <th>Segment</th>
+                                    <th>Meta</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for report in reports %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td><code>{{ report.report_code }}</code></td>
+                                    <td>
+                                        <strong>{{ report.title }}</strong><br>
+                                        <small><code>{{ report.slug }}</code></small>
+                                    </td>
+                                    <td>{{ industry_label_map.get(report.industry_slug, report.industry_slug) if report.industry_slug else '-' }}</td>
+                                    <td>
+                                        <small>Geo: {{ report.geography or 'Global' }}</small><br>
+                                        <small>Pages: {{ report.page_count or 185 }}</small><br>
+                                        <small>Format: {{ report.delivery_format or 'PDF' }}</small>
+                                    </td>
+                                    <td>INR {{ '%.2f'|format(report.price or 0) }}</td>
+                                    <td>
+                                        <input type="checkbox"
+                                               class="report-status"
+                                               data-id="{{ report.id }}"
+                                               {% if report.is_active %}checked{% endif %}
+                                               data-toggle="toggle"
+                                               data-onstyle="success"
+                                               data-offstyle="secondary"
+                                               data-on="Active"
+                                               data-off="Inactive">
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#reportModal" 
+                                                onclick="editReport(this)"
+                                                data-json='{{ report|tojson|escape }}' title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <a class="btn btn-sm btn-outline-info" href="{{ url_for('report_detail_by_slug', slug=report.slug) }}" target="_blank" title="View Live">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" onclick="setDeleteUrl('{{ url_for('admin.delete_report', id=report.id) }}')" title="Delete">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="8" class="text-center py-4">No reports found.</td></tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="modal fade" id="reportModal" tabindex="-1">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content form-modal-shell">
+                    <form id="reportForm" method="POST" action="{{ url_for('admin.manage_reports') }}" enctype="multipart/form-data">
+                        <input type="hidden" name="id" id="report_id">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="reportModalTitle">Add/Edit Report</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4 modal-form-scroll" style="max-height: calc(100vh - 120px); --modal-form-min-width: 920px;">
+                            <div class="container-fluid modal-form-layout">
+                                <div class="row">
+                                    
+                                    <!-- ========== LEFT COLUMN ========== -->
+                                    <div class="col-md-8">
+                                        
+                                        <!-- Basic Information -->
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Report Title <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="title" id="report_title" required placeholder="Enter report title">
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">URL Slug <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="slug" id="report_slug" required placeholder="auto-generated-from-title">
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Short Excerpt</label>
+                                            <div id="report_excerpt_toolbar" class="mb-2">
+                                                <span class="ql-formats">
+                                                    <button class="ql-bold" title="Bold"></button>
+                                                    <button class="ql-italic" title="Italic"></button>
+                                                    <button class="ql-link" title="Link"></button>
+                                                </span>
+                                                <span class="ql-formats">
+                                                    <button class="ql-list" value="ordered" title="Ordered List"></button>
+                                                    <button class="ql-list" value="bullet" title="Bullet List"></button>
+                                                </span>
+                                                <span class="ql-formats">
+                                                    <button class="ql-clean" title="Clear"></button>
+                                                </span>
+                                            </div>
+                                            <div id="report_excerpt_editor" class="report-editor" style="height: 180px;"></div>
+                                            <textarea class="form-control d-none" name="excerpt" id="report_excerpt"></textarea>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Main Overview Content <span class="text-danger">*</span></label>
+                                            <div id="report_content_toolbar" class="mb-2">
+                                                <span class="ql-formats">
+                                                    <select class="ql-header" title="Header">
+                                                        <option selected></option>
+                                                        <option value="1"></option>
+                                                        <option value="2"></option>
+                                                        <option value="3"></option>
+                                                    </select>
+                                                </span>
+                                                <span class="ql-formats">
+                                                    <button class="ql-bold" title="Bold"></button>
+                                                    <button class="ql-italic" title="Italic"></button>
+                                                    <button class="ql-underline" title="Underline"></button>
+                                                    <button class="ql-link" title="Link"></button>
+                                                </span>
+                                                <span class="ql-formats">
+                                                    <button class="ql-list" value="ordered" title="Ordered List"></button>
+                                                    <button class="ql-list" value="bullet" title="Bullet List"></button>
+                                                    <button class="ql-blockquote" title="Quote"></button>
+                                                </span>
+                                                <span class="ql-formats">
+                                                    <button class="ql-clean" title="Clear"></button>
+                                                </span>
+                                            </div>
+                                            <div id="report_content_editor" class="report-editor"></div>
+                                            <textarea class="form-control d-none" name="content" id="report_content"></textarea>
+                                        </div>
+
+                                        <!-- Advanced Sections -->
+                                        <hr class="my-4">
+                                        <h6 style="font-weight: 600; color: #333; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px;">Table of Contents & Report Details</h6>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Table of Contents</label>
+                                            <div id="report_toc_toolbar" class="mb-2" style="font-size: 12px;">
+                                                <span class="ql-formats">
+                                                    <select class="ql-header" title="Header">
+                                                        <option selected></option>
+                                                        <option value="2"></option>
+                                                        <option value="3"></option>
+                                                    </select>
+                                                </span>
+                                                <span class="ql-formats">
+                                                    <button class="ql-list" value="ordered"></button>
+                                                    <button class="ql-list" value="bullet"></button>
+                                                    <button class="ql-link"></button>
+                                                </span>
+                                            </div>
+                                            <div id="report_toc_editor" class="report-editor"></div>
+                                            <textarea class="form-control d-none" name="table_of_contents" id="report_table_of_contents"></textarea>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label style="font-weight: 500; color: #333;">List of Figures (LoF)</label>
+                                                    <div id="report_lof_toolbar" class="mb-2" style="font-size: 12px;">
+                                                        <span class="ql-formats">
+                                                            <button class="ql-list" value="ordered"></button>
+                                                            <button class="ql-list" value="bullet"></button>
+                                                            <button class="ql-link"></button>
+                                                        </span>
+                                                    </div>
+                                                    <div id="report_lof_editor" class="report-editor"></div>
+                                                    <textarea class="form-control d-none" name="list_of_figures" id="report_lof"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label style="font-weight: 500; color: #333;">List of Tables (LoT)</label>
+                                                    <div id="report_lot_toolbar" class="mb-2" style="font-size: 12px;">
+                                                        <span class="ql-formats">
+                                                            <button class="ql-list" value="ordered"></button>
+                                                            <button class="ql-list" value="bullet"></button>
+                                                            <button class="ql-link"></button>
+                                                        </span>
+                                                    </div>
+                                                    <div id="report_lot_editor" class="report-editor"></div>
+                                                    <textarea class="form-control d-none" name="list_of_tables" id="report_lot"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Report Review / Analysis</label>
+                                            <div id="report_review_toolbar" class="mb-2" style="font-size: 12px;">
+                                                <span class="ql-formats">
+                                                    <button class="ql-bold"></button>
+                                                    <button class="ql-italic"></button>
+                                                    <button class="ql-blockquote"></button>
+                                                    <button class="ql-link"></button>
+                                                </span>
+                                            </div>
+                                            <div id="report_review_editor" class="report-editor"></div>
+                                            <textarea class="form-control d-none" name="report_review" id="report_review"></textarea>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">FAQs</label>
+                                            <div id="report_faqs_toolbar" class="mb-2">
+                                                <span class="ql-formats">
+                                                    <button class="ql-bold"></button>
+                                                    <button class="ql-italic"></button>
+                                                    <button class="ql-list" value="ordered"></button>
+                                                    <button class="ql-list" value="bullet"></button>
+                                                </span>
+                                                <span class="ql-formats">
+                                                    <button class="ql-link"></button>
+                                                    <select class="ql-header">
+                                                        <option selected></option>
+                                                        <option value="2"></option>
+                                                        <option value="3"></option>
+                                                    </select>
+                                                </span>
+                                                <span class="ql-formats">
+                                                    <button class="ql-clean"></button>
+                                                </span>
+                                            </div>
+                                            <div id="report_faqs_editor" class="report-editor" style="height: 200px;"></div>
+                                            <textarea class="form-control d-none" name="report_faqs" id="report_faqs"></textarea>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick="loadSampleFaqs()">
+                                                <i class="fas fa-magic"></i> Load Sample FAQs
+                                            </button>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- ========== RIGHT COLUMN ========== -->
+                                    <div class="col-md-4">
+
+                                        <!-- Basic Metadata -->
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Industry Segment</label>
+                                            <select name="industry_slug" id="report_industry_slug" class="form-control">
+                                                <option value="">Select segment</option>
+                                                {% for option in industry_options %}
+                                                <option value="{{ option.slug }}">{{ option.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Geography</label>
+                                            <input type="text" class="form-control" name="geography" id="report_geography" placeholder="e.g. North America, Global">
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Coverage</label>
+                                            <select name="coverage" id="report_coverage" class="form-control">
+                                                <option value="Global">Global</option>
+                                                <option value="Regional">Regional</option>
+                                                <option value="Country">Country</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Pricing & Details -->
+                                        <hr class="my-3">
+                                        <h6 style="font-weight: 600; color: #333; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px;">Pricing & Details</h6>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Price (INR)</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">₹</span>
+                                                <input type="number" step="0.01" class="form-control" name="price" id="report_price" value="0">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Report Code</label>
+                                            <input type="text" class="form-control" name="code" id="report_code" placeholder="Auto-generate">
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Page Count</label>
+                                            <input type="number" class="form-control" name="page_count" id="report_page_count" value="185">
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Delivery Format</label>
+                                            <input type="text" class="form-control" name="delivery_format" id="report_delivery_format" value="PDF">
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Published Date Label</label>
+                                            <input type="text" class="form-control" name="published_label" id="report_published_label" placeholder="e.g. March 2024">
+                                        </div>
+
+                                        <!-- Banner Image -->
+                                        <hr class="my-3">
+                                        <h6 style="font-weight: 600; color: #333; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px;">Media</h6>
+
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 500; color: #333;">Banner Image</label>
+                                            <input type="file" class="form-control" name="banner_image">
+                                            <small class="text-muted d-block mt-1">Recommended: 1200x400px</small>
+                                        </div>
+
+                                        <!-- Status -->
+                                        <hr class="my-3">
+                                        <h6 style="font-weight: 600; color: #333; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px;">Status</h6>
+
+                                        <div class="form-group mb-0">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="is_active" id="report_is_active" checked>
+                                                <label class="form-check-label" for="report_is_active" style="font-weight: 500; color: #333;">
+                                                    Publish (Active)
+                                                </label>
+                                            </div>
+                                            <small class="text-muted d-block mt-2">When active, this report will be visible to users</small>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">Delete this report?</div>
+                    <div class="modal-footer">
+                        <form id="deleteForm" method="POST">
+                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% include 'admin/head_foot/script.html' %}
+<script>
+    let reportExcerptQuill = null;
+    let reportContentQuill = null;
+    let reportTocQuill = null;
+    let reportLofQuill = null;
+    let reportLotQuill = null;
+    let reportReviewQuill = null;
+    let reportFaqsQuill = null;
+
+    function initQuillEditors() {
+        if (reportExcerptQuill) return;
+
+        reportExcerptQuill = new Quill('#report_excerpt_editor', { theme: 'snow', modules: { toolbar: '#report_excerpt_toolbar' } });
+        reportContentQuill = new Quill('#report_content_editor', { theme: 'snow', modules: { toolbar: '#report_content_toolbar' } });
+        reportTocQuill = new Quill('#report_toc_editor', { theme: 'snow', modules: { toolbar: '#report_toc_toolbar' } });
+        reportLofQuill = new Quill('#report_lof_editor', { theme: 'snow', modules: { toolbar: '#report_lof_toolbar' } });
+        reportLotQuill = new Quill('#report_lot_editor', { theme: 'snow', modules: { toolbar: '#report_lot_toolbar' } });
+        reportReviewQuill = new Quill('#report_review_editor', { theme: 'snow', modules: { toolbar: '#report_review_toolbar' } });
+        reportFaqsQuill = new Quill('#report_faqs_editor', { theme: 'snow', modules: { toolbar: '#report_faqs_toolbar' } });
+    }
+
+    function syncEditors() {
+        if (reportExcerptQuill) document.getElementById('report_excerpt').value = reportExcerptQuill.root.innerHTML;
+        if (reportContentQuill) document.getElementById('report_content').value = reportContentQuill.root.innerHTML;
+        if (reportTocQuill) document.getElementById('report_table_of_contents').value = reportTocQuill.root.innerHTML;
+        if (reportLofQuill) document.getElementById('report_lof').value = reportLofQuill.root.innerHTML;
+        if (reportLotQuill) document.getElementById('report_lot').value = reportLotQuill.root.innerHTML;
+        if (reportReviewQuill) document.getElementById('report_review').value = reportReviewQuill.root.innerHTML;
+        if (reportFaqsQuill) document.getElementById('report_faqs').value = reportFaqsQuill.root.innerHTML;
+    }
+
+    document.getElementById('reportModal').addEventListener('shown.bs.modal', function () {
+        initQuillEditors();
+    });
+
+    document.getElementById('reportForm').addEventListener('submit', function () {
+        syncEditors();
+    });
+
+    function openReportModal() {
+        document.getElementById('reportForm').reset();
+        document.getElementById('report_id').value = '';
+        document.getElementById('reportModalTitle').innerText = 'Add Report';
+        if (reportExcerptQuill) {
+            reportExcerptQuill.root.innerHTML = '';
+            reportContentQuill.root.innerHTML = '';
+            reportTocQuill.root.innerHTML = '';
+            reportLofQuill.root.innerHTML = '';
+            reportLotQuill.root.innerHTML = '';
+            reportReviewQuill.root.innerHTML = '';
+            reportFaqsQuill.root.innerHTML = '';
+        }
+    }
+
+    function editReport(btn) {
+        const row = JSON.parse(btn.getAttribute('data-json'));
+        openReportModal();
+        document.getElementById('reportModalTitle').innerText = 'Edit Report';
+        document.getElementById('report_id').value = row.id || '';
+        document.getElementById('report_title').value = row.title || '';
+        document.getElementById('report_slug').value = row.slug || '';
+        document.getElementById('report_industry_slug').value = row.industry_slug || '';
+        document.getElementById('report_geography').value = row.geography || '';
+        document.getElementById('report_coverage').value = row.coverage || 'Global';
+        document.getElementById('report_price').value = row.price || 0;
+        document.getElementById('report_code').value = row.report_code || '';
+        document.getElementById('report_page_count').value = row.page_count || 185;
+        document.getElementById('report_delivery_format').value = row.delivery_format || 'PDF';
+        document.getElementById('report_published_label').value = row.published_label || '';
+        document.getElementById('report_is_active').checked = !!row.is_active;
+
+        const modal = document.getElementById('reportModal');
+        const handler = () => {
+            if (reportExcerptQuill) {
+                reportExcerptQuill.root.innerHTML = row.excerpt || '';
+                reportContentQuill.root.innerHTML = row.content || '';
+                reportTocQuill.root.innerHTML = row.table_of_contents || '';
+                reportLofQuill.root.innerHTML = row.list_of_figures || '';
+                reportLotQuill.root.innerHTML = row.list_of_tables || '';
+                reportReviewQuill.root.innerHTML = row.report_review || '';
+                reportFaqsQuill.root.innerHTML = row.faqs || '';
+            }
+            modal.removeEventListener('shown.bs.modal', handler);
+        };
+        modal.addEventListener('shown.bs.modal', handler);
+    }
+
+    function setDeleteUrl(url) {
+        document.getElementById('deleteForm').action = url;
+    }
+</script>
+</body>
+</html>

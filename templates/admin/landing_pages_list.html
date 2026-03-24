@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" href="" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Landing Pages</title>
+    {% include 'admin/head_foot/style.html' %}
+</head>
+
+<body>
+    <div id="app">
+        <div class="main-wrapper">
+            <div class="navbar-bg"></div>
+            {% include 'admin/head_foot/head.html' %}
+
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header">
+                        <h1>Landing Page CMS</h1>
+                        <div class="section-header-breadcrumb">
+                            <div class="breadcrumb mb-0">
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></div>
+                                <div class="breadcrumb-item active" aria-current="page">Landing Page CMS</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-body">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between">
+                                <h4>Landing Pages</h4>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#landingModal" onclick="openLandingModal()">
+                                    <i class="fa fa-plus"></i> Add Landing Page
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Title</th>
+                                                <th>Slug</th>
+                                                <th>Hero</th>
+                                                <th>Menu</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for row in landing_pages %}
+                                            <tr>
+                                                <td>{{ loop.index }}</td>
+                                                <td>{{ row.title }}</td>
+                                                <td><code>{{ row.slug }}</code></td>
+                                                <td>{{ row.hero_title or '-' }}</td>
+                                                <td>
+                                                    <span class="badge {{ 'bg-success' if row.show_in_menu else 'bg-secondary' }}">
+                                                        {{ 'Shown' if row.show_in_menu else 'Hidden' }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge {{ 'bg-success' if row.is_active else 'bg-danger' }}">
+                                                        {{ 'Active' if row.is_active else 'Inactive' }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-2">
+                                                        <button class="btn btn-sm btn-outline-warning" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#landingModal" 
+                                                            onclick='editLanding(this)'
+                                                            data-id="{{ row.id }}"
+                                                            data-title="{{ row.title|escape }}"
+                                                            data-slug="{{ row.slug }}"
+                                                            data-hero-title="{{ row.hero_title|escape if row.hero_title else '' }}"
+                                                            data-hero-subtitle="{{ row.hero_subtitle|escape if row.hero_subtitle else '' }}"
+                                                            data-content="{{ row.content|escape if row.content else '' }}"
+                                                            data-cta-text="{{ row.cta_text|escape if row.cta_text else '' }}"
+                                                            data-cta-url="{{ row.cta_url|escape if row.cta_url else '' }}"
+                                                            data-banner-svg="{{ row.banner_svg|escape if row.banner_svg else '' }}"
+                                                            data-seo-title="{{ row.seo_title|escape if row.seo_title else '' }}"
+                                                            data-seo-keywords="{{ row.seo_keywords|escape if row.seo_keywords else '' }}"
+                                                            data-seo-description="{{ row.seo_description|escape if row.seo_description else '' }}"
+                                                            data-show-in-menu="{{ 1 if row.show_in_menu else 0 }}"
+                                                            data-active="{{ 1 if row.is_active else 0 }}"
+                                                            title="Edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <a class="btn btn-sm btn-outline-info" href="{% if row.slug == 'home' or row.slug.startswith('home-') %}{{ url_for('home') }}{% else %}{{ url_for('landing_page', slug=row.slug) }}{% endif %}" target="_blank" title="View Live">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" onclick="setDeleteUrl('{{ url_for('admin.delete_landing_page', id=row.id) }}')" title="Delete">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% else %}
+                                            <tr>
+                                                <td colspan="7" class="text-center py-4">No landing pages yet</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="modal fade" id="landingModal" tabindex="-1">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <form method="POST" action="{{ url_for('admin.landing_pages_list') }}">
+                            <input type="hidden" name="id" id="lp_id">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="lpModalTitle">Add Landing Page</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body" style="max-height:calc(100dvh - 220px); overflow-y:auto;">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Title *</label>
+                                        <input type="text" class="form-control" name="title" id="lp_title" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Slug *</label>
+                                        <input type="text" class="form-control" name="slug" id="lp_slug" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Hero Title</label>
+                                        <input type="text" class="form-control" name="hero_title" id="lp_hero_title">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Hero Subtitle</label>
+                                        <input type="text" class="form-control" name="hero_subtitle" id="lp_hero_subtitle">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>CTA Text</label>
+                                        <input type="text" class="form-control" name="cta_text" id="lp_cta_text" placeholder="Get Sample Report">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>CTA URL</label>
+                                        <input type="text" class="form-control" name="cta_url" id="lp_cta_url" placeholder="/contact-us">
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label>Vector Banner (SVG path)</label>
+                                        <input type="text" class="form-control" name="banner_svg" id="lp_banner_svg" placeholder="assets/images/vectors/hero-analytics.svg">
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label>Content (HTML Supported)</label>
+                                        <div id="lp_editor_toolbar" class="mb-2">
+                                            <select class="ql-header">
+                                                <option selected></option>
+                                                <option value="1"></option>
+                                                <option value="2"></option>
+                                            </select>
+                                            <button class="ql-bold"></button>
+                                            <button class="ql-italic"></button>
+                                            <button class="ql-underline"></button>
+                                            <button class="ql-link"></button>
+                                            <button class="ql-list" value="ordered"></button>
+                                            <button class="ql-list" value="bullet"></button>
+                                            <button class="ql-blockquote"></button>
+                                            <button class="ql-clean"></button>
+                                        </div>
+                                        <div id="lp_editor"></div>
+                                        <input type="hidden" name="content" id="lp_content">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label>SEO Title</label>
+                                        <input type="text" class="form-control" name="seo_title" id="lp_seo_title">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label>SEO Keywords</label>
+                                        <input type="text" class="form-control" name="seo_keywords" id="lp_seo_keywords">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label>SEO Description</label>
+                                        <input type="text" class="form-control" name="seo_description" id="lp_seo_description">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch mt-2">
+                                            <input class="form-check-input" type="checkbox" name="show_in_menu" id="lp_show_in_menu" value="1">
+                                            <label class="form-check-label">Show in frontend menu</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch mt-2">
+                                            <input class="form-check-input" type="checkbox" name="is_active" id="lp_is_active" value="1" checked>
+                                            <label class="form-check-label">Active</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success">Save Landing Page</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="deleteModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Delete</h5>
+                            <button class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">Delete this landing page?</div>
+                        <div class="modal-footer">
+                            <form id="deleteForm" method="POST">
+                                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% include 'admin/head_foot/script.html' %}
+            <script>
+                const lpTitle = document.getElementById('lp_title');
+                const lpSlug = document.getElementById('lp_slug');
+                const lpId = document.getElementById('lp_id');
+                const landingForm = document.querySelector('#landingModal form');
+                let lpQuill = null;
+
+                function ensureLandingQuill() {
+                    if (lpQuill) return lpQuill;
+                    lpQuill = new Quill('#lp_editor', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: '#lp_editor_toolbar'
+                        }
+                    });
+                    return lpQuill;
+                }
+
+                ensureLandingQuill();
+
+                function generateSlug(value) {
+                    return value.toLowerCase().trim().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                }
+
+                lpTitle.addEventListener('input', function () {
+                    if (!lpId.value) lpSlug.value = generateSlug(lpTitle.value);
+                });
+
+                function openLandingModal() {
+                    document.getElementById('lpModalTitle').innerText = 'Add Landing Page';
+                    lpId.value = '';
+                    lpTitle.value = '';
+                    lpSlug.value = '';
+                    document.getElementById('lp_hero_title').value = '';
+                    document.getElementById('lp_hero_subtitle').value = '';
+                    document.getElementById('lp_content').value = '';
+                    document.getElementById('lp_cta_text').value = '';
+                    document.getElementById('lp_cta_url').value = '';
+                    document.getElementById('lp_banner_svg').value = '';
+                    document.getElementById('lp_seo_title').value = '';
+                    document.getElementById('lp_seo_keywords').value = '';
+                    document.getElementById('lp_seo_description').value = '';
+                    document.getElementById('lp_show_in_menu').checked = false;
+                    document.getElementById('lp_is_active').checked = true;
+                    ensureLandingQuill().setContents([]);
+                }
+
+                function editLanding(btn) {
+                    const row = btn.dataset;
+                    document.getElementById('lpModalTitle').innerText = 'Edit Landing Page';
+                    lpId.value = row.id || '';
+                    lpTitle.value = row.title || '';
+                    lpSlug.value = row.slug || '';
+                    document.getElementById('lp_hero_title').value = row.heroTitle || '';
+                    document.getElementById('lp_hero_subtitle').value = row.heroSubtitle || '';
+                    document.getElementById('lp_content').value = row.content || '';
+                    document.getElementById('lp_cta_text').value = row.ctaText || '';
+                    document.getElementById('lp_cta_url').value = row.ctaUrl || '';
+                    document.getElementById('lp_banner_svg').value = row.bannerSvg || '';
+                    document.getElementById('lp_seo_title').value = row.seoTitle || '';
+                    document.getElementById('lp_seo_keywords').value = row.seoKeywords || '';
+                    document.getElementById('lp_seo_description').value = row.seoDescription || '';
+                    document.getElementById('lp_show_in_menu').checked = Number(row.showInMenu) === 1;
+                    document.getElementById('lp_is_active').checked = Number(row.active) === 1;
+
+                    ensureLandingQuill().root.innerHTML = row.content || '';
+                }
+
+                function setDeleteUrl(url) {
+                    document.getElementById('deleteForm').action = url;
+                }
+
+                landingForm.addEventListener('submit', function () {
+                    document.getElementById('lp_content').value = ensureLandingQuill().root.innerHTML;
+                });
+            </script>
+        </div>
+    </div>
+</body>
+
+</html>

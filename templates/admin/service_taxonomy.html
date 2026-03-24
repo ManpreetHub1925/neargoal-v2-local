@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Service Taxonomy</title>
+    {% include 'admin/head_foot/style.html' %}
+</head>
+<body>
+<div id="app">
+    <div class="main-wrapper">
+        <div class="navbar-bg"></div>
+        {% include 'admin/head_foot/head.html' %}
+        <div class="main-content">
+            <section class="section">
+                <div class="section-header">
+                    <h1>Service Taxonomy</h1>
+                </div>
+                <div class="section-body">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <form method="GET" action="{{ url_for('admin.service_taxonomy') }}" class="row g-2">
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="q" value="{{ q or '' }}" placeholder="Search industries, advisory, service lines">
+                                </div>
+                                <div class="col-md-2 d-grid">
+                                    <button class="btn btn-primary" type="submit">Search</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Industry Reports</h4>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="openCreate('industry')">Add Industry</button>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table class="table table-striped align-middle">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Slug</th>
+                                    <th>Tagline</th>
+                                    <th>Order</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for row in industries %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ row.name }}</td>
+                                    <td><code>{{ row.slug }}</code></td>
+                                    <td>{{ row.tagline or '-' }}</td>
+                                    <td>{{ row.display_order }}</td>
+                                    <td><span class="badge {{ 'bg-success' if row.is_active else 'bg-secondary' }}">{{ 'Active' if row.is_active else 'Inactive' }}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#itemModal" onclick='openEdit("industry", {{ row|tojson }})'><i class="fa fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" onclick="setDeleteUrl('{{ url_for('admin.delete_service_taxonomy_item', section='industry', id=row.id) }}')"><i class="fa fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="7" class="text-center">No industries found.</td></tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Research & Advisory</h4>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="openCreate('advisory')">Add Advisory Item</button>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table class="table table-striped align-middle">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Slug</th>
+                                    <th>Order</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for row in advisory %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ row.name }}</td>
+                                    <td><code>{{ row.slug }}</code></td>
+                                    <td>{{ row.display_order }}</td>
+                                    <td><span class="badge {{ 'bg-success' if row.is_active else 'bg-secondary' }}">{{ 'Active' if row.is_active else 'Inactive' }}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#itemModal" onclick='openEdit("advisory", {{ row|tojson }})'><i class="fa fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" onclick="setDeleteUrl('{{ url_for('admin.delete_service_taxonomy_item', section='advisory', id=row.id) }}')"><i class="fa fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="6" class="text-center">No advisory items found.</td></tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Service Lines</h4>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="openCreate('family')">Add Service Line</button>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table class="table table-striped align-middle">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Title</th>
+                                    <th>Slug</th>
+                                    <th>Order</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for row in families %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ row.title }}</td>
+                                    <td><code>{{ row.slug }}</code></td>
+                                    <td>{{ row.display_order }}</td>
+                                    <td><span class="badge {{ 'bg-success' if row.is_active else 'bg-secondary' }}">{{ 'Active' if row.is_active else 'Inactive' }}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#itemModal" onclick='openEdit("family", {{ row|tojson }})'><i class="fa fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" onclick="setDeleteUrl('{{ url_for('admin.delete_service_taxonomy_item', section='family', id=row.id) }}')"><i class="fa fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="6" class="text-center">No service lines found.</td></tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="modal fade" id="itemModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <form method="POST" action="{{ url_for('admin.service_taxonomy', q=q) }}">
+                        <input type="hidden" name="id" id="item_id">
+                        <input type="hidden" name="section" id="item_section">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="itemModalTitle">Add Item</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label id="itemNameLabel">Name *</label>
+                                    <input type="text" class="form-control" name="name" id="item_name" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label>Display Order</label>
+                                    <input type="number" class="form-control" name="display_order" id="item_display_order" value="0">
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label>Slug</label>
+                                    <input type="text" class="form-control" name="slug" id="item_slug">
+                                </div>
+                                <div class="col-md-12 mb-3" id="taglineWrap">
+                                    <label>Tagline (Industry only)</label>
+                                    <textarea class="form-control" name="tagline" id="item_tagline" rows="2"></textarea>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="is_active" id="item_is_active" value="1" checked>
+                                        <label class="form-check-label">Active</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">Delete this item?</div>
+                    <div class="modal-footer">
+                        <form id="deleteForm" method="POST">
+                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% include 'admin/head_foot/script.html' %}
+        <script>
+            function slugify(value) {
+                return (value || '').toLowerCase().trim().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            }
+            document.getElementById('item_name').addEventListener('input', function () {
+                if (!document.getElementById('item_id').value) {
+                    document.getElementById('item_slug').value = slugify(this.value);
+                }
+            });
+            function setCommon(section) {
+                document.getElementById('item_section').value = section;
+                document.getElementById('taglineWrap').style.display = section === 'industry' ? 'block' : 'none';
+                document.getElementById('itemNameLabel').innerText = section === 'family' ? 'Title *' : 'Name *';
+            }
+            function openCreate(section) {
+                setCommon(section);
+                document.getElementById('itemModalTitle').innerText = 'Add Item';
+                document.getElementById('item_id').value = '';
+                document.getElementById('item_name').value = '';
+                document.getElementById('item_slug').value = '';
+                document.getElementById('item_tagline').value = '';
+                document.getElementById('item_display_order').value = '0';
+                document.getElementById('item_is_active').checked = true;
+            }
+            function openEdit(section, row) {
+                setCommon(section);
+                document.getElementById('itemModalTitle').innerText = 'Edit Item';
+                document.getElementById('item_id').value = row.id || '';
+                document.getElementById('item_name').value = row.name || row.title || '';
+                document.getElementById('item_slug').value = row.slug || '';
+                document.getElementById('item_tagline').value = row.tagline || '';
+                document.getElementById('item_display_order').value = row.display_order || 0;
+                document.getElementById('item_is_active').checked = Number(row.is_active) === 1;
+            }
+            function setDeleteUrl(url) {
+                document.getElementById('deleteForm').action = url;
+            }
+        </script>
+    </div>
+</div>
+</body>
+</html>

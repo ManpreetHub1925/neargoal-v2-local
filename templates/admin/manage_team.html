@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" href="" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+
+    <title>Dashboard</title>
+
+    {% include 'admin/head_foot/style.html' %}
+
+</head>
+
+<body>
+    <div id="app">
+        <div class="main-wrapper">
+
+            <div class="navbar-bg"></div>
+
+            {% include 'admin/head_foot/head.html' %}
+
+
+            <div class="main-content">
+                <section class="section">
+
+                    <div class="section-header">
+                        <h1>Manage Team</h1>
+                        <div class="section-header-breadcrumb">
+                            <div class="breadcrumb mb-0">
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                                </div>
+                                <div class="breadcrumb-item active" aria-current="page">Manage Team</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="mt-4 row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h4 class="mb-0">Team Members</h4>
+                                        <button class="btn btn-primary" onclick="openAddModal()">
+                                            <i class="fa fa-plus"></i> Add Team Member
+                                        </button>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped align-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Member</th>
+                                                        <th>Designation</th>
+                                                        <th>Contact / Social</th>
+                                                        <th>Display</th>
+                                                        <th>Status</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for member in team %}
+                                                    <tr>
+                                                        <td>{{ loop.index }}</td>
+                                                        <td>
+                                                            <div class="d-flex align-items-center gap-3">
+                                                                {% if member.profile_image %}
+                                                                <img src="{{ url_for('static', filename=member.profile_image) }}"
+                                                                    width="48" height="48" class="rounded-circle border" style="object-fit: cover;">
+                                                                {% else %}
+                                                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border" style="width: 48px; height: 48px;">
+                                                                    <i class="fas fa-user text-muted"></i>
+                                                                </div>
+                                                                {% endif %}
+                                                                <div>
+                                                                    <div class="fw-bold">{{ member.name }}</div>
+                                                                    <small class="text-muted">{{ member.department or '-' }}</small>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>{{ member.designation }}</td>
+                                                        <td>
+                                                            <div class="d-flex flex-column gap-1">
+                                                                {% if member.email %}
+                                                                <small><i class="far fa-envelope me-1"></i> {{ member.email }}</small>
+                                                                {% endif %}
+                                                                <div class="d-flex gap-2 mt-1">
+                                                                    {% if member.linkedin_url %}
+                                                                    <a href="{{ member.linkedin_url }}" target="_blank" class="text-primary"><i class="fab fa-linkedin"></i></a>
+                                                                    {% endif %}
+                                                                    {% if member.twitter_url %}
+                                                                    <a href="{{ member.twitter_url }}" target="_blank" class="text-info"><i class="fab fa-twitter"></i></a>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td><span class="badge bg-light text-dark border">{{ member.display_order }}</span></td>
+                                                        <td>
+                                                            <div class="form-check form-switch p-0 d-inline-block">
+                                                                <input type="checkbox" class="form-check-input ms-0 member-status-toggle" 
+                                                                    data-id="{{ member.id }}" {% if member.is_active %}checked{% endif %}>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex gap-2">
+                                                                <button class="btn btn-sm btn-outline-info" 
+                                                                    onclick='previewTeam(this)'
+                                                                    data-id="{{ member.id }}"
+                                                                    data-name="{{ member.name|escape }}"
+                                                                    data-designation="{{ member.designation|escape }}"
+                                                                    data-department="{{ member.department|escape if member.department else '' }}"
+                                                                    data-email="{{ member.email|escape if member.email else '' }}"
+                                                                    data-bio="{{ member.bio|escape if member.bio else '' }}"
+                                                                    data-image="{{ member.profile_image or '' }}"
+                                                                    data-linkedin="{{ member.linkedin_url or '' }}"
+                                                                    data-facebook="{{ member.facebook_url or '' }}"
+                                                                    data-instagram="{{ member.instagram_url or '' }}"
+                                                                    data-twitter="{{ member.twitter_url or '' }}"
+                                                                    data-github="{{ member.github_url or '' }}"
+                                                                    data-other="{{ member.other_url or '' }}"
+                                                                    data-order="{{ member.display_order }}"
+                                                                    data-active="{{ 1 if member.is_active else 0 }}" title="Preview">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+
+                                                                <button class="btn btn-sm btn-outline-warning" 
+                                                                    onclick='editTeam(this)'
+                                                                    data-id="{{ member.id }}"
+                                                                    data-name="{{ member.name|escape }}"
+                                                                    data-designation="{{ member.designation|escape }}"
+                                                                    data-department="{{ member.department|escape if member.department else '' }}"
+                                                                    data-email="{{ member.email|escape if member.email else '' }}"
+                                                                    data-bio="{{ member.bio|escape if member.bio else '' }}"
+                                                                    data-image="{{ member.profile_image or '' }}"
+                                                                    data-linkedin="{{ member.linkedin_url or '' }}"
+                                                                    data-facebook="{{ member.facebook_url or '' }}"
+                                                                    data-instagram="{{ member.instagram_url or '' }}"
+                                                                    data-twitter="{{ member.twitter_url or '' }}"
+                                                                    data-github="{{ member.github_url or '' }}"
+                                                                    data-other="{{ member.other_url or '' }}"
+                                                                    data-order="{{ member.display_order }}"
+                                                                    data-active="{{ 1 if member.is_active else 0 }}" title="Edit">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </button>
+
+                                                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                                                    data-bs-target="#deleteModal"
+                                                                    onclick="setDeleteUrl('{{ url_for('admin.delete_team_member', id=member.id) }}')" title="Delete">
+                                                                    <i class="fas fa-trash-alt"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% else %}
+                                                    <tr>
+                                                        <td colspan="10" class="text-center py-5">
+                                                            <img src="{{ url_for('static', filename='admin/assets/img/empty-box.webp') }}"
+                                                                width="200">
+                                                            <h4 class="py-2">No team members found</h4>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+
+            <!-- ADD / EDIT MODAL -->
+            <div class="modal fade" id="addTeamModal" tabindex="-1">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                    <div class="modal-content form-modal-shell">
+                        <form method="POST" action="{{ url_for('admin.manage_team') }}" enctype="multipart/form-data">
+                            <input type="hidden" name="id" id="team_id">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="teamModalTitle">Add Team Member</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4 modal-form-scroll" style="max-height: calc(100vh - 120px); --modal-form-min-width: 920px;">
+                                <div class="container-fluid modal-form-layout">
+                                    <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="fw-bold">Full Name <span class="text-danger">*</span></label>
+                                                <input type="text" name="name" id="team_name" class="form-control" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="fw-bold">Designation <span class="text-danger">*</span></label>
+                                                <input type="text" name="designation" id="team_designation" class="form-control" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="fw-bold">Department</label>
+                                                <input type="text" name="department" id="team_department" class="form-control">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="fw-bold">Email</label>
+                                                <input type="email" name="email" id="team_email" class="form-control">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label class="fw-bold">Professional Biography <span class="text-danger">*</span></label>
+                                            <div id="editor-toolbar" class="mb-2">
+                                                <span class="ql-formats">
+                                                    <button class="ql-bold"></button>
+                                                    <button class="ql-italic"></button>
+                                                    <button class="ql-link"></button>
+                                                </span>
+                                                <span class="ql-formats">
+                                                    <button class="ql-list" value="ordered"></button>
+                                                    <button class="ql-list" value="bullet"></button>
+                                                </span>
+                                            </div>
+                                            <div id="editor" style="height: 250px;"></div>
+                                            <textarea name="bio" id="team_bio" class="d-none"></textarea>
+                                        </div>
+
+                                        <h6 class="fw-bold mt-4 mb-3 border-bottom pb-2">Social & Professional Links</h6>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label><i class="fab fa-linkedin me-1"></i> LinkedIn Profile</label>
+                                                <input type="url" name="linkedin_url" id="team_linkedin" class="form-control" placeholder="https://linkedin.com/in/...">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label><i class="fab fa-twitter me-1"></i> Twitter / X Profile</label>
+                                                <input type="url" name="twitter_url" id="team_twitter" class="form-control">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label><i class="fab fa-facebook me-1"></i> Facebook Profile</label>
+                                                <input type="url" name="facebook_url" id="team_facebook" class="form-control">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label><i class="fab fa-instagram me-1"></i> Instagram Profile</label>
+                                                <input type="url" name="instagram_url" id="team_instagram" class="form-control">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label><i class="fab fa-github me-1"></i> GitHub Profile</label>
+                                                <input type="url" name="github_url" id="team_github" class="form-control">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label><i class="fas fa-link me-1"></i> Other Portfolio/Link</label>
+                                                <input type="url" name="other_url" id="team_other" class="form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="card border mb-3">
+                                            <div class="card-header bg-light"><h6 class="mb-0">Profile Image</h6></div>
+                                            <div class="card-body text-center">
+                                                <input type="file" name="profile_image" class="form-control mb-2" accept="image/*">
+                                                <small class="text-muted">Recommended: Square image (400x400px).</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="card border mb-3">
+                                            <div class="card-header bg-light"><h6 class="mb-0">Display Settings</h6></div>
+                                            <div class="card-body">
+                                                <div class="form-group mb-3">
+                                                    <label class="fw-bold">Display Order</label>
+                                                    <input type="number" name="display_order" id="team_display_order" class="form-control" value="0">
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" name="is_active" id="team_is_active" value="1" checked>
+                                                    <label class="form-check-label">Active Member</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-grid gap-2 mt-4">
+                                            <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save me-2"></i>SAVE MEMBER</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- ================= PREVIEW TEAM MODAL ================= -->
+            <div class="modal fade" id="previewTeamModal" tabindex="-1">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Team Member Preview</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="previewTeamBody">
+                            <!-- Content will be injected via JavaScript -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= Delete Record ================= -->
+            <div class="modal fade" id="deleteModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Delete</h5>
+                            <button class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            Are you sure you want to delete this record?
+                        </div>
+
+                        <div class="modal-footer">
+                            <form id="deleteForm" method="POST">
+                                <button type="submit" class="btn btn-danger">
+                                    Yes, Delete
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cancel
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+            {% include 'admin/head_foot/script.html' %}
+
+            <!-- Quill -->
+            <script>
+                let quill = null;
+                const modalEl = document.getElementById('addTeamModal');
+
+                modalEl.addEventListener('shown.bs.modal', () => {
+                    if (!quill) {
+                        quill = new Quill('#editor', {
+                            theme: 'snow',
+                            modules: {
+                                toolbar: {
+                                    container: '#editor-toolbar'
+                                }
+                            }
+                        });
+                    }
+                });
+
+                function openAddModal() {
+                    document.getElementById('teamModalTitle').innerText = 'Add Team Member';
+                    document.getElementById('team_id').value = '';
+                    document.getElementById('team_name').value = '';
+                    document.getElementById('team_designation').value = '';
+                    document.getElementById('team_department').value = '';
+                    document.getElementById('team_email').value = '';
+                    document.getElementById('team_bio').value = '';
+                    document.getElementById('team_linkedin').value = '';
+                    document.getElementById('team_facebook').value = '';
+                    document.getElementById('team_instagram').value = '';
+                    document.getElementById('team_twitter').value = '';
+                    document.getElementById('team_github').value = '';
+                    document.getElementById('team_other').value = '';
+                    document.getElementById('team_display_order').value = '0';
+                    document.getElementById('team_is_active').checked = true;
+
+                    if (quill) {
+                        quill.root.innerHTML = '';
+                    }
+
+                    new bootstrap.Modal(modalEl).show();
+                }
+
+                function editTeam(btn) {
+                    const row = btn.dataset;
+                    document.getElementById('teamModalTitle').innerText = 'Edit Team Member';
+                    document.getElementById('team_id').value = row.id;
+                    document.getElementById('team_name').value = row.name;
+                    document.getElementById('team_designation').value = row.designation;
+                    document.getElementById('team_department').value = row.department || '';
+                    document.getElementById('team_email').value = row.email || '';
+                    document.getElementById('team_linkedin').value = row.linkedin || '';
+                    document.getElementById('team_facebook').value = row.facebook || '';
+                    document.getElementById('team_instagram').value = row.instagram || '';
+                    document.getElementById('team_twitter').value = row.twitter || '';
+                    document.getElementById('team_github').value = row.github || '';
+                    document.getElementById('team_other').value = row.other || '';
+                    document.getElementById('team_display_order').value = row.order;
+                    document.getElementById('team_is_active').checked = Number(row.active) === 1;
+
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+
+                    const handler = () => {
+                        if (quill) {
+                            quill.root.innerHTML = row.bio || '';
+                        }
+                        modalEl.removeEventListener('shown.bs.modal', handler);
+                    };
+                    modalEl.addEventListener('shown.bs.modal', handler);
+                }
+
+                // Sync content on submit
+                document.querySelector('#addTeamModal form').addEventListener('submit', () => {
+                    if (quill) {
+                        document.getElementById('team_bio').value = quill.root.innerHTML;
+                    }
+                });
+
+                function previewTeam(btn) {
+                    const row = btn.dataset;
+                    const modal = new bootstrap.Modal(document.getElementById('previewTeamModal'));
+                    const body = document.getElementById('previewTeamBody');
+
+                    let socialHtml = '';
+                    const socials = [
+                        { icon: 'fab fa-linkedin', url: row.linkedin, color: 'text-primary' },
+                        { icon: 'fab fa-facebook', url: row.facebook, color: 'text-primary' },
+                        { icon: 'fab fa-instagram', url: row.instagram, color: 'text-danger' },
+                        { icon: 'fab fa-twitter', url: row.twitter, color: 'text-info' },
+                        { icon: 'fab fa-github', url: row.github, color: 'text-dark' },
+                        { icon: 'fas fa-link', url: row.other, color: 'text-secondary' }
+                    ];
+
+                    socials.forEach(s => {
+                        if (s.url && s.url !== 'None') {
+                            socialHtml += `<a href="${s.url}" target="_blank" class="fs-4 ${s.color} me-3"><i class="${s.icon}"></i></a>`;
+                        }
+                    });
+
+                    body.innerHTML = `
+                        <div class="text-center mb-4">
+                            <img src="/static/${row.image || 'admin/assets/img/admin/avatar.webp'}" 
+                                class="rounded-circle border shadow-sm mb-3" width="120" height="120" style="object-fit: cover;">
+                            <h4 class="mb-1">${row.name}</h4>
+                            <p class="text-primary fw-bold mb-0">${row.designation}</p>
+                            <p class="text-muted small">${row.department || ''}</p>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold border-bottom pb-2">Biography</h6>
+                            <div class="text-muted small" style="line-height: 1.6;">${row.bio || 'No biography provided.'}</div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold border-bottom pb-2">Contact & Social</h6>
+                            <p class="mb-2 small"><i class="far fa-envelope me-2"></i> ${row.email || 'No email provided'}</p>
+                            <div class="d-flex gap-3 mt-3 justify-content-center">
+                                ${socialHtml || '<span class="text-muted small italic">No social links provided</span>'}
+                            </div>
+                        </div>
+                    `;
+                    modal.show();
+                }
+
+                function setDeleteUrl(url) {
+                    document.getElementById('deleteForm').action = url;
+                }
+
+                document.querySelectorAll('.member-status-toggle').forEach(toggle => {
+                    toggle.addEventListener('change', function() {
+                        const memberId = this.getAttribute('data-id');
+                        const isActive = this.checked ? 1 : 0;
+                        
+                        fetch("{{ url_for('admin.team_status', id=0) }}".replace('0', memberId), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `status=${isActive}`
+                        }).then(response => {
+                            if (!response.ok) {
+                                iziToast.error({ title: 'Error', message: 'Failed to update status', position: 'topRight' });
+                                this.checked = !this.checked;
+                            } else {
+                                iziToast.success({ title: 'Success', message: 'Status updated', position: 'topRight' });
+                            }
+                        }).catch(error => {
+                            iziToast.error({ title: 'Error', message: 'Connection error', position: 'topRight' });
+                            this.checked = !this.checked;
+                        });
+                    });
+                });
+            </script>
+
+
+
+</body>
+
+</html>

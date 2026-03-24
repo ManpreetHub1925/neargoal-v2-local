@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% include 'admin/head_foot/style.html' %}
+</head>
+<body>
+<div id="app">
+    <div class="main-wrapper">
+        <div class="navbar-bg"></div>
+        {% include 'admin/head_foot/head.html' %}
+        <div class="main-content">
+            <section class="section">
+                <div class="section-header">
+                    <h1>Dashboard</h1>
+                </div>
+
+                <div class="row">
+                    {% set cards = [
+                        ('Revenue (Paid)', 'INR ' ~ ('%.2f'|format(dashboard.revenue_total or 0)), 'fa-rupee-sign', 'bg-success'),
+                        ('Orders (Paid/Total)', dashboard.orders_paid ~ ' / ' ~ dashboard.orders_total, 'fa-shopping-cart', 'bg-primary'),
+                        ('Pending Orders', dashboard.orders_pending, 'fa-hourglass-half', 'bg-warning'),
+                        ('Lead to Paid %', ('%.1f'|format((dashboard.orders_paid * 100.0 / dashboard.total_leads) if dashboard.total_leads else 0)) ~ '%', 'fa-funnel-dollar', 'bg-dark'),
+                        ('Total Leads', dashboard.total_leads, 'fa-user-plus', 'bg-info'),
+                        ('New Inquiries', dashboard.new_inquiries, 'fa-comments', 'bg-warning'),
+                        ('Reports (Active/Total)', dashboard.active_reports ~ ' / ' ~ dashboard.total_reports, 'fa-file-alt', 'bg-danger'),
+                        ('Services (Active/Total)', dashboard.active_services ~ ' / ' ~ dashboard.total_services, 'fa-life-ring', 'bg-secondary'),
+                        ('Open Jobs', dashboard.open_jobs, 'fa-briefcase', 'bg-dark'),
+                        ('Job Applications', dashboard.job_applications, 'fa-id-badge', 'bg-primary'),
+                        ('Subscribers', dashboard.subscribers, 'fa-envelope', 'bg-success'),
+                        ('Published Blogs', dashboard.published_blogs, 'fa-blog', 'bg-info'),
+                        ('Landing Pages Active', dashboard.active_landing_pages, 'fa-layer-group', 'bg-secondary'),
+                        ('GA Clicks / Impressions', dashboard.clicks ~ ' / ' ~ dashboard.impressions, 'fa-chart-line', 'bg-warning')
+                    ] %}
+                    {% for title, value, icon, color in cards %}
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+                        <div class="card card-statistic-1">
+                            <div class="card-icon {{ color }}"><i class="fas {{ icon }}"></i></div>
+                            <div class="card-wrap">
+                                <div class="card-header"><h4>{{ title }}</h4></div>
+                                <div class="card-body">{{ value }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card shadow">
+                            <div class="card-header"><h4>Lead Trend (Last 14 Days)</h4></div>
+                            <div class="card-body"><canvas id="leadChart" height="130"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card shadow">
+                            <div class="card-header"><h4>Paid Orders & Revenue (Last 14 Days)</h4></div>
+                            <div class="card-body"><canvas id="ordersChart" height="130"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header"><h4>Google Analytics – Impressions vs Clicks</h4></div>
+                            <div class="card-body"><canvas id="gaChart" height="90"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6 col-12">
+                        <div class="card">
+                            <div class="card-header"><h4>Recent Orders</h4></div>
+                            <div class="card-body table-responsive">
+                                <table class="table table-striped align-middle">
+                                    <thead><tr><th>Order</th><th>Report</th><th>Amount</th><th>Payment</th><th>Date</th></tr></thead>
+                                    <tbody>
+                                    {% for row in recent_orders %}
+                                    <tr>
+                                        <td><code>{{ row.order_ref }}</code></td>
+                                        <td>{{ row.report_title }}</td>
+                                        <td>{{ row.currency }} {{ '%.2f'|format(row.amount or 0) }}</td>
+                                        <td><span class="badge {{ 'bg-success' if row.payment_status == 'paid' else 'bg-warning' }}">{{ row.payment_status }}</span></td>
+                                        <td>{{ row.created_at }}</td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="5" class="text-center">No order data</td></tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-12">
+                        <div class="card">
+                            <div class="card-header"><h4>Recent Inquiries</h4></div>
+                            <div class="card-body table-responsive">
+                                <table class="table table-striped align-middle">
+                                    <thead><tr><th>Type</th><th>Lead</th><th>Status</th><th>Date</th></tr></thead>
+                                    <tbody>
+                                    {% for row in recent_inquiries %}
+                                    <tr>
+                                        <td>{{ row.inquiry_type }}</td>
+                                        <td>{{ row.full_name }}<br><small>{{ row.email }}</small></td>
+                                        <td><span class="badge {{ 'bg-success' if row.status in ['qualified','closed'] else 'bg-info' }}">{{ row.status }}</span></td>
+                                        <td>{{ row.created_at }}</td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="4" class="text-center">No inquiry data</td></tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-12">
+                        <div class="card">
+                            <div class="card-header"><h4>Top Report Sales</h4></div>
+                            <div class="card-body table-responsive">
+                                <table class="table table-striped align-middle">
+                                    <thead><tr><th>Report</th><th>Orders</th><th>Revenue</th></tr></thead>
+                                    <tbody>
+                                    {% for row in top_reports %}
+                                    <tr>
+                                        <td>{{ row.report_title }}</td>
+                                        <td>{{ row.orders_count }}</td>
+                                        <td>INR {{ '%.2f'|format(row.revenue or 0) }}</td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="3" class="text-center">No paid sales yet</td></tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-12">
+                        <div class="card">
+                            <div class="card-header"><h4>Latest Blogs</h4></div>
+                            <div class="card-body table-responsive">
+                                <table class="table table-striped align-middle">
+                                    <thead><tr><th>Title</th><th>Status</th><th>Date</th></tr></thead>
+                                    <tbody>
+                                    {% for blog in latest_blogs %}
+                                    <tr>
+                                        <td>{{ blog.title }}</td>
+                                        <td><span class="badge {{ 'bg-success' if blog.status == 'published' else 'bg-secondary' }}">{{ blog.status }}</span></td>
+                                        <td>{{ blog.created_at }}</td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="3" class="text-center">No blog data</td></tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        {% include 'admin/head_foot/script.html' %}
+        <script>
+            const gaLabels = {{ ga_chart.labels | default([]) | tojson }};
+            const impressionsData = {{ ga_chart.impressions | default([]) | tojson }};
+            const clicksData = {{ ga_chart.clicks | default([]) | tojson }};
+            const leadLabels = {{ leads_chart['labels'] | default([]) | tojson }};
+            const leadValues = {{ leads_chart['values'] | default([]) | tojson }};
+            const orderLabels = {{ orders_chart['labels'] | default([]) | tojson }};
+            const paidCounts = {{ orders_chart['paid_count'] | default([]) | tojson }};
+            const paidRevenue = {{ orders_chart['paid_revenue'] | default([]) | tojson }};
+
+            new Chart(document.getElementById('gaChart'), {
+                type: 'line',
+                data: {
+                    labels: gaLabels,
+                    datasets: [
+                        {label: 'Impressions', data: impressionsData, borderWidth: 2, fill: false, tension: .25},
+                        {label: 'Clicks', data: clicksData, borderWidth: 2, fill: false, tension: .25}
+                    ]
+                },
+                options: {responsive: true, plugins: {legend: {position: 'top'}}}
+            });
+
+            new Chart(document.getElementById('leadChart'), {
+                type: 'bar',
+                data: {
+                    labels: leadLabels,
+                    datasets: [{label: 'Leads', data: leadValues, backgroundColor: 'rgba(13,110,253,.55)', borderColor: 'rgba(13,110,253,1)', borderWidth: 1}]
+                },
+                options: {responsive: true, plugins: {legend: {display: false}}}
+            });
+
+            new Chart(document.getElementById('ordersChart'), {
+                type: 'line',
+                data: {
+                    labels: orderLabels,
+                    datasets: [
+                        {label: 'Paid Orders', data: paidCounts, borderWidth: 2, fill: false, yAxisID: 'y'},
+                        {label: 'Paid Revenue (INR)', data: paidRevenue, borderWidth: 2, fill: false, yAxisID: 'y1'}
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: {mode: 'index', intersect: false},
+                    scales: {
+                        y: {type: 'linear', position: 'left'},
+                        y1: {type: 'linear', position: 'right', grid: {drawOnChartArea: false}}
+                    }
+                }
+            });
+        </script>
+    </div>
+</div>
+</body>
+</html>

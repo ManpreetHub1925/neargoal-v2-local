@@ -16,15 +16,15 @@
             <span>Published: {{ report.published_label }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <i data-lucide="file-text" class="w-4 h-4 text-sky-400"></i>
+            <i data-lucide="notebook-text" class="w-4 h-4 text-sky-400"></i>
             <span>Pages: {{ report.pages }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <i data-lucide="globe" class="w-4 h-4 text-sky-400"></i>
-            <span>Format: PDF + Excel</span>
+            <i data-lucide="file-chart-pie" class="w-4 h-4 text-sky-400"></i>
+            <span>Format: PDF</span>
           </div>
           <div class="flex items-center gap-2">
-            <i data-lucide="map" class="w-4 h-4 text-sky-400"></i>
+            <i data-lucide="globe" class="w-4 h-4 text-sky-400"></i>
             <span>Coverage: {{ report.coverage }}</span>
           </div>
         </div>
@@ -32,20 +32,21 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8 md:p-12">
         <div class="lg:col-span-2 space-y-8">
+          
           <div class="border-b border-slate-200">
             <nav class="-mb-px flex flex-wrap gap-6">
               <button type="button" data-tab-target="overview" class="tab-button border-sky-600 text-sky-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Report Overview</button>
               <button type="button" data-tab-target="toc" class="tab-button border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Table of Contents</button>
               <button type="button" data-tab-target="lof" class="tab-button border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">List of Figures</button>
               <button type="button" data-tab-target="lot" class="tab-button border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">List of Tables</button>
-              <button type="button" data-tab-target="companies" class="tab-button border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Companies</button>
+              <button type="button" data-tab-target="sample" class="tab-button border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Sample Request</button>
             </nav>
           </div>
 
           <section data-tab-panel="overview" class="tab-panel">
             <h2 class="text-2xl font-bold text-slate-900 mb-4">Report Overview</h2>
             <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
-              <p>{{ report.description }}</p>
+              <p style="text-align: justify;">{{ report.description }}</p>
               <p class="mt-4">Our analysis integrates proprietary data models with expert interviews to provide a high-fidelity view of market dynamics. We examine not just the top-line growth figures, but the underlying profitability pools, supply chain bottlenecks, and technological inflection points that will determine winners and losers in the coming decade.</p>
             </div>
           </section>
@@ -55,7 +56,7 @@
             <div class="bg-slate-50 rounded-lg border border-slate-200 p-6">
               <ul class="space-y-3">
                 {% for item in report.toc %}
-                <li class="flex items-start gap-3 text-slate-700"><span class="font-mono text-sky-600 text-sm mt-1">{{ loop.index }}.</span><span>{{ item }}</span></li>
+                <li class="flex items-start gap-3 text-slate-700 text-align-justify"><span class="font-mono text-sky-600 text-sm mt-1">{{ loop.index }}.</span><span>{{ item }}</span></li>
                 {% endfor %}
               </ul>
             </div>
@@ -91,6 +92,75 @@
             </div>
           </section>
 
+          <section data-tab-panel="sample" class="tab-panel hidden">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Request Report Sample</h2>
+            <div class="bg-slate-50 rounded-lg border border-slate-200 p-6">
+              <form id="form-inline-sample" action="{{ url_for('submit_inquiry') }}" method="post" class="space-y-4 captcha-form">
+                <input type="hidden" name="inquiry_type" value="report-sample" />
+                <input type="hidden" name="industry_slug" value="{{ report.industry_slug }}" />
+                <input type="hidden" name="target_type" value="Sample Report Request" />
+                <input type="hidden" name="target_slug" value="{{ report.id }}" />
+                <input type="hidden" name="report_id" value="{{ report.code }}" />
+                <input type="hidden" name="redirect_to" value="{{ request.path }}" />
+                <input type="hidden" name="report_title" value="{{ report.title }}" />
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Company <span class="text-red-500">*</span></label>
+                    <input type="text" name="company" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Designation <span class="text-red-500">*</span></label>
+                    <input type="text" name="designation" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Work Email <span class="text-red-500">*</span></label>
+                    <input type="email" name="email" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Country <span class="text-red-500">*</span></label>
+                    <select name="country" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border">
+                      <option value="">Select Country</option>
+                      <option value="US">United States</option>
+                      </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Phone <span class="text-red-500">*</span></label>
+                    <div class="flex gap-2">
+                      <input type="tel" name="country_code" class="flex-1 rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border text-sm" placeholder="+1" />
+                      <input type="tel" name="phone" class="flex-[2] rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" placeholder="123-456-7890" required />
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Specific Requirements / Remarks <span class="text-red-500">*</span></label>
+                  <textarea rows="3" name="message" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" placeholder="Any specific areas of interest?"></textarea>
+                </div>
+                
+                <div class="bg-white/50 p-3 rounded-lg border border-slate-200">
+                  <label class="block text-xs font-medium text-slate-700 mb-1 captcha-label">Human Check: ? + ? = ? <span class="text-red-500">*</span></label>
+                  <input type="number" name="captcha" required class="w-20 rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-1 px-2 border text-sm captcha-input" />
+                  <p class="hidden text-red-500 text-xs mt-1 captcha-error">Incorrect answer. Please try again.</p>
+                </div>
+                
+                <div class="pt-2">
+                  <button type="submit" class="w-full bg-sky-600 text-white font-bold py-3 rounded-md hover:bg-sky-500 transition-colors">Request Sample PDF</button>
+                </div>
+              </form>
+            </div>
+          </section>
+
           <section data-tab-panel="companies" class="tab-panel hidden">
             <h2 class="text-2xl font-bold text-slate-900 mb-4">Key Companies Covered</h2>
             <div class="flex flex-wrap gap-2">
@@ -116,10 +186,6 @@
               <button type="button" data-modal-open="buy-report" class="w-full flex items-center justify-center px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-sky-900/20">
                 Buy Now
                 <i data-lucide="lock" class="w-4 h-4 ml-2"></i>
-              </button>
-              <button type="button" data-modal-open="sample-report" class="w-full flex items-center justify-center px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg transition-colors">
-                Request Sample
-                <i data-lucide="download" class="w-4 h-4 ml-2"></i>
               </button>
               <button type="button" data-modal-open="analyst-report" class="w-full flex items-center justify-center px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg transition-colors">
                 Speak to Analyst
@@ -162,66 +228,246 @@
           </div>
         </div>
       </div>
+
+      <div class="border-t border-slate-200 p-8 md:p-12">
+        <h2 class="text-2xl font-bold text-slate-900 mb-8">Frequently Asked Questions</h2>
+        <div class="space-y-4">
+          {% for item in [
+            ("How do I receive the report after purchase?", "Once payment is confirmed, the report will be delivered to your registered email address in PDF format within 24 hours."),
+            ("Can I request a customized report?", "Yes, we offer custom research tailored to your specific business needs. You can contact our analysts or use the 'Request Custom Research' option on the industry page."),
+            ("What payment methods are accepted?", "We accept all major credit cards, bank transfers, and online payment gateways including Razorpay and PayPal."),
+            ("Is there post-purchase support available?", "Every report purchase includes 1 hour of complimentary analyst support to help you navigate the data and insights.")
+          ] %}
+          <div class="faq-item border border-slate-200 rounded-lg overflow-hidden">
+            <button type="button" class="w-full flex items-center justify-between p-4 bg-white hover:bg-slate-50 transition-colors text-left" data-faq-trigger>
+              <span class="font-semibold text-slate-900">{{ item[0] }}</span>
+              <span class="faq-symbol text-sky-600 font-bold text-xl ml-4">+</span>
+            </button>
+            <div class="faq-panel hidden p-4 bg-slate-50 border-t border-slate-200 text-slate-600 text-sm leading-relaxed">
+              {{ item[1] }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      
     </div>
   </div>
 </div>
 
-{% for modal_id, modal_title, inquiry_type in [
-  ('buy-report', 'Purchase Report', 'report-purchase'),
-  ('sample-report', 'Request Sample PDF', 'report-sample'),
-  ('analyst-report', 'Speak to an Analyst', 'report-analyst')
+<!-- Buy Report Modal (Separate for Payment Gateway Integration) -->
+<div id="buy-report" class="modal hidden fixed inset-0 z-[70]">
+  <div class="modal-overlay absolute inset-0 bg-slate-900/70" data-modal-close></div>
+  <div class="relative h-full w-full overflow-x-auto overflow-y-auto p-4">
+    <div class="min-h-full flex items-center justify-center">
+      <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl p-6 md:p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-slate-900">Purchase Report</h2>
+          <button type="button" class="text-slate-400 hover:text-slate-600" data-modal-close>&times;</button>
+        </div>
+        
+        <form id="form-buy-report" action="{{ url_for('checkout') }}" method="post" class="space-y-4 captcha-form">
+          <input type="hidden" name="inquiry_type" value="report-purchase" />
+          <input type="hidden" name="target_type" value="Purchase Report" />
+          <input type="hidden" name="target_slug" value="{{ report.id }}" />
+          <input type="hidden" name="redirect_to" value="{{ request.path }}" />
+          <input type="hidden" name="report_title" value="{{ report.title }}" />
+          <input type="hidden" name="industry_slug" value="{{ report.industry_slug }}" />
+          <input type="hidden" name="report_id" value="{{ report.code }}" />
+          
+          <div class="bg-slate-50 p-4 rounded-lg mb-4 border border-slate-200">
+            <p class="font-bold text-slate-900">{{ report.title }}</p>
+            <p class="text-sm text-slate-600">Single User License - ${{ report.price }}</p>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+              <input type="text" name="name" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Company <span class="text-red-500">*</span></label>
+              <input type="text" name="company" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Designation <span class="text-red-500">*</span></label>
+              <input type="text" name="designation" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Work Email <span class="text-red-500">*</span></label>
+              <input type="email" name="email" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Country <span class="text-red-500">*</span></label>
+              <select name="country" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border">
+                <option value="">Select Country</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Phone <span class="text-red-500">*</span></label>
+              <div class="flex gap-2">
+                <input type="tel" name="country_code" class="flex-1 rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border text-sm" placeholder="+1" />
+                <input type="tel" name="phone" class="flex-[2] rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" placeholder="123-456-7890" required />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Billing Address <span class="text-red-500">*</span></label>
+            <textarea name="billing_address" required rows="2" class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" placeholder="Enter your full billing address"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">GST Number (Optional)</label>
+            <input type="text" name="gst_number" class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" placeholder="Enter GST number if applicable" />
+          </div>
+          
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <label class="block text-xs font-medium text-slate-700 mb-1 captcha-label">Human Check: ? + ? = ? <span class="text-red-500">*</span></label>
+            <input type="number" name="captcha" required class="w-20 rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-1 px-2 border text-sm captcha-input" />
+            <p class="hidden text-red-500 text-xs mt-1 captcha-error">Incorrect answer. Please try again.</p>
+          </div>
+          
+          <div class="pt-4">
+            <button type="submit" class="w-full bg-sky-600 text-white font-bold py-3 rounded-md hover:bg-sky-500 transition-colors">Proceed to Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Other Inquiry Modals -->
+{% for modal_id, modal_title, inquiry_type, target_type in [
+  ('sample-report', 'Request Sample PDF', 'report-sample', 'Sample Report Request'),
+  ('analyst-report', 'Speak to an Analyst', 'report-analyst', 'Speak to Analyst')
 ] %}
 <div id="{{ modal_id }}" class="modal hidden fixed inset-0 z-[70]">
   <div class="modal-overlay absolute inset-0 bg-slate-900/70" data-modal-close></div>
-  <div class="relative min-h-full flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl p-6 md:p-8">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-slate-900">{{ modal_title }}</h2>
-        <button type="button" class="text-slate-400 hover:text-slate-600" data-modal-close>&times;</button>
-      </div>
-      <form action="{{ url_for('submit_inquiry') }}" method="post" class="space-y-4">
-        <input type="hidden" name="inquiry_type" value="{{ inquiry_type }}" />
-        <input type="hidden" name="target_type" value="report" />
-        <input type="hidden" name="target_slug" value="{{ report.id }}" />
-        <input type="hidden" name="redirect_to" value="{{ request.path }}" />
-        {% if modal_id == 'buy-report' %}
-        <div class="bg-slate-50 p-4 rounded-lg mb-4 border border-slate-200">
-          <p class="font-bold text-slate-900">{{ report.title }}</p>
-          <p class="text-sm text-slate-600">Single User License - ${{ report.price }}</p>
+  <div class="relative h-full w-full overflow-x-auto overflow-y-auto p-4">
+    <div class="min-h-full flex items-center justify-center">
+      <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl p-6 md:p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-slate-900">{{ modal_title }}</h2>
+          <button type="button" class="text-slate-400 hover:text-slate-600" data-modal-close>&times;</button>
         </div>
-        {% endif %}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-            <input type="text" name="name" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+        
+        <form id="form-{{ modal_id }}" action="{{ url_for('submit_inquiry') }}" method="post" class="space-y-4 captcha-form">
+          <input type="hidden" name="inquiry_type" value="{{ inquiry_type }}" />
+          <input type="hidden" name="target_type" value="{{ target_type }}" />
+          <input type="hidden" name="target_slug" value="{{ report.id }}" />
+          <input type="hidden" name="redirect_to" value="{{ request.path }}" />
+          <input type="hidden" name="report_title" value="{{ report.title }}" />
+          <input type="hidden" name="industry_slug" value="{{ report.industry_slug }}" />
+          <input type="hidden" name="report_id" value="{{ report.code }}" />
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+              <input type="text" name="name" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Company <span class="text-red-500">*</span></label>
+              <input type="text" name="company" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+            </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Work Email</label>
-            <input type="email" name="email" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Designation <span class="text-red-500">*</span></label>
+              <input type="text" name="designation" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Work Email <span class="text-red-500">*</span></label>
+              <input type="email" name="email" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+            </div>
           </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Company</label>
-          <input type="text" name="company" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
-        </div>
-        {% if modal_id != 'buy-report' %}
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">{% if modal_id == 'analyst-report' %}Specific Questions / Topic{% else %}Phone Number{% endif %}</label>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Country <span class="text-red-500">*</span></label>
+              <select name="country" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border">
+                <option value="">Select Country</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Phone <span class="text-red-500">*</span></label>
+              <div class="flex gap-2">
+                <input type="tel" name="country_code" class="flex-1 rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border text-sm" placeholder="+1" />
+                <input type="tel" name="phone" class="flex-[2] rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" placeholder="123-456-7890" required />
+              </div>
+            </div>
+          </div>
+          
           {% if modal_id == 'analyst-report' %}
-          <textarea rows="4" name="requirement" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border"></textarea>
-          {% else %}
-          <input type="tel" name="phone" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border" />
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Additional Remarks <span class="text-red-500">*</span></label>
+            <textarea rows="4" name="message" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-2 px-3 border"></textarea>
+          </div>
           {% endif %}
-        </div>
-        {% endif %}
-        <div class="pt-4">
-          <button type="submit" class="w-full bg-sky-600 text-white font-bold py-3 rounded-md hover:bg-sky-500 transition-colors">
-            {% if modal_id == 'buy-report' %}Proceed to Payment{% elif modal_id == 'sample-report' %}Request Sample{% else %}Submit Request{% endif %}
-          </button>
-        </div>
-      </form>
+          
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <label class="block text-xs font-medium text-slate-700 mb-1 captcha-label">Human Check: ? + ? = ? <span class="text-red-500">*</span></label>
+            <input type="number" name="captcha" required class="w-20 rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 py-1 px-2 border text-sm captcha-input" />
+            <p class="hidden text-red-500 text-xs mt-1 captcha-error">Incorrect answer. Please try again.</p>
+          </div>
+          
+          <div class="pt-4">
+            <button type="submit" class="w-full bg-sky-600 text-white font-bold py-3 rounded-md hover:bg-sky-500 transition-colors">
+              {% if modal_id == 'sample-report' %}Request Sample{% else %}Submit Request{% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
 {% endfor %}
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Find all forms with the class 'captcha-form'
+  const captchaForms = document.querySelectorAll('.captcha-form');
+
+  captchaForms.forEach(form => {
+    const label = form.querySelector('.captcha-label');
+    const input = form.querySelector('.captcha-input');
+    const errorMsg = form.querySelector('.captcha-error');
+    let correctAnswer = 0;
+
+    // Function scoped to each specific form
+    function generateCaptcha() {
+      const num1 = Math.floor(Math.random() * 10) + 1;
+      const num2 = Math.floor(Math.random() * 10) + 1;
+      correctAnswer = num1 + num2;
+      label.innerHTML = `Human Check: ${num1} + ${num2} = ? <span class="text-red-500">*</span>`;
+    }
+
+    // Initialize for this form
+    generateCaptcha();
+
+    // Validate on submit
+    form.addEventListener('submit', (event) => {
+      const userAnswer = parseInt(input.value, 10);
+
+      if (userAnswer !== correctAnswer) {
+        event.preventDefault(); // Stop submission
+        errorMsg.classList.remove('hidden');
+        input.value = '';
+        generateCaptcha(); // Generate new problem
+        input.focus();
+      } else {
+        errorMsg.classList.add('hidden');
+      }
+    });
+  });
+});
+</script>
+
 {% endblock %}

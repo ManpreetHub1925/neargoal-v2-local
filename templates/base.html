@@ -10,11 +10,11 @@
   </head>
   <body class="bg-white text-slate-900">
     <div class="min-h-screen flex flex-col bg-white font-sans text-slate-900">
-      <header id="site-header" class="fixed top-0 left-0 right-0 z-50 bg-white py-4 shadow-sm transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header id="site-header" class="fixed top-0 left-0 right-0 z-50 bg-white {% if not breadcrumbs %}border-b border-slate-100{% endif %} transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div class="flex justify-between items-center">
             <a href="{{ url_for('home') }}" class="flex flex-col items-start">
-              <img src="{{ url_for('static', filename='images/primary-logo5.png') }}" alt="Neargoal Consulting" class="w-48 md:w-56 h-auto" />
+              <img src="{{ url_for('static', filename='images/primary-logo5.png') }}" alt="Neargoal Consulting" class="h-auto" />
             </a>
 
             <nav class="hidden lg:flex items-center space-x-8">
@@ -60,6 +60,10 @@
                 </div>
               </div>
 
+              {% for item in nav_pages %}
+              <a href="{{ url_for('landing_page', slug=item.slug) }}" class="text-sm font-medium {% if request.path == url_for('landing_page', slug=item.slug) %}text-sky-600{% else %}text-slate-700 hover:text-sky-600{% endif %} transition-colors py-2">{{ item.title }}</a>
+              {% endfor %}
+
               <a href="{{ url_for('contact') }}" class="text-sm font-medium {% if request.path.startswith('/contact') %}text-sky-600{% else %}text-slate-700 hover:text-sky-600{% endif %} transition-colors py-2">Contact Us</a>
               <button type="button" class="p-2 text-slate-500 hover:text-sky-600 transition-colors" data-search-toggle aria-label="Open search">
                 <i data-lucide="search" class="w-5 h-5"></i>
@@ -77,14 +81,15 @@
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <form action="{{ url_for('market_intelligence') }}" method="get" class="relative">
               <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-              <input type="text" name="search" placeholder="Search reports, insights, and more..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all" data-search-input />
+              <input type="text" name="search" placeholder="Search reports, insights, and more..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all" data-search-input data-autocomplete="full" />
+              <div class="autocomplete-dropdown absolute left-[48px] right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto hidden w-[calc(100%-48px)]"></div>
             </form>
           </div>
         </div>
 
         {% if breadcrumbs %}
-        <div class="bg-slate-50 border-b border-slate-200">
-          <nav aria-label="Breadcrumb" class="bg-slate-50 border-b border-slate-200 py-2 px-4 md:px-8">
+        <nav aria-label="Breadcrumb" class="bg-slate-50 border-y border-slate-200 py-2 px-4 md:px-8">
+          <div class="max-w-7xl mx-auto">
             <ol class="flex items-center space-x-2 text-sm text-slate-500 flex-wrap">
               {% for crumb in breadcrumbs %}
               <li class="flex items-center">
@@ -101,8 +106,8 @@
               </li>
               {% endfor %}
             </ol>
-          </nav>
-        </div>
+          </div>
+        </nav>
         {% endif %}
       </header>
 
@@ -148,6 +153,10 @@
             </div>
           </div>
 
+          {% for item in nav_pages %}
+          <a href="{{ url_for('landing_page', slug=item.slug) }}" class="text-lg font-medium text-slate-900 border-b border-slate-100 pb-4" data-mobile-link>{{ item.title }}</a>
+          {% endfor %}
+
           <a href="{{ url_for('contact') }}" class="text-lg font-medium text-slate-900 border-b border-slate-100 pb-4" data-mobile-link>Contact Us</a>
         </div>
       </div>
@@ -183,16 +192,20 @@
             <div>
               <h3 class="text-lg font-semibold mb-4 text-white">Quick Links</h3>
               <ul class="space-y-2 text-sm text-slate-400">
-                <li><a href="{{ url_for('about') }}" class="hover:text-sky-400 transition-colors">About Us</a></li>
                 <li><a href="{{ url_for('market_intelligence') }}" class="hover:text-sky-400 transition-colors">Market Intelligence</a></li>
                 <li><a href="{{ url_for('consulting') }}" class="hover:text-sky-400 transition-colors">Consulting Services</a></li>
+                <li><a href="{{ url_for('market_updates', category_slug='press-releases') }}" class="hover:text-sky-400 transition-colors">Press Releases</a></li>
                 <li><a href="{{ url_for('careers') }}" class="hover:text-sky-400 transition-colors">Careers</a></li>
+                {% for item in nav_pages %}
+                <li><a href="{{ url_for('landing_page', slug=item.slug) }}" class="hover:text-sky-400 transition-colors">{{ item.title }}</a></li>
+                {% endfor %}
+                <li><a href="{{ url_for('about') }}" class="hover:text-sky-400 transition-colors">About Us</a></li>
                 <li><a href="{{ url_for('contact') }}" class="hover:text-sky-400 transition-colors">Contact Us</a></li>
               </ul>
             </div>
 
             <div>
-              <h3 class="text-lg font-semibold mb-4 text-white">Industries</h3>
+              <h3 class="text-lg font-semibold mb-4 text-white">Industry Coverage</h3>
               <ul class="space-y-2 text-sm text-slate-400">
                 {% for item in nav_industries %}
                 <li><a href="{{ url_for('industry_detail', industry_slug=item.slug) }}" class="hover:text-sky-400 transition-colors">{{ item.name }}</a></li>

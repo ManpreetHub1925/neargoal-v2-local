@@ -26,6 +26,9 @@ textarea {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+}
+
+.header-scrolled .max-w-7xl {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
@@ -63,4 +66,16 @@ textarea {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Logo Rework */
+#site-header img {
+  height: 5.5rem; /* Increased size */
+  width: auto;
+  filter: brightness(0.9) contrast(1.1); /* Darker look */
+  transition: all 0.3s ease;
+}
+
+.header-scrolled #site-header img {
+  height: 4.5rem; /* Slightly smaller when scrolled */
 }

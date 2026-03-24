@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" href="" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+
+    <title>Dashboard</title>
+
+    {% include 'admin/head_foot/style.html' %}
+
+</head>
+
+<body>
+    <div id="app">
+        <div class="main-wrapper">
+
+            <div class="navbar-bg"></div>
+
+            {% include 'admin/head_foot/head.html' %}
+
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header">
+                        <h1>Send bulk mail</h1>
+                        <div class="section-header-breadcrumb">
+                            <div class="breadcrumb mb-0">
+                                <div class="breadcrumb-item"><a
+                                        href="{{ url_for('admin.dashboard') }}">Dashboard</a></div>
+                                <div class="breadcrumb-item active" aria-current="page">Send bulk mail</div>
+                            </div>
+                        </div>
+                    </div>
+
+<div class="section-body">
+
+<!-- ===================== SEND HISTORY ===================== -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between">
+        <h4>Send History</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendModal">
+            <i class="fa fa-paper-plane"></i> Send New
+        </button>
+    </div>
+
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Type</th>
+                <th>Sent To</th>
+                <th>Failed</th>
+                <th>Date</th>
+                <th>Preview</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in history %}
+            <tr>
+                <td>{{ row.subject }}</td>
+                <td>
+                    <span class="badge {{ 'bg-info' if row.content_type=='html' else 'bg-secondary' }}">
+                        {{ row.content_type|upper }}
+                    </span>
+                </td>
+                <td>{{ row.sent_count }}</td>
+                <td>{{ row.failed_count or 0 }}</td>
+                <td>{{ row.created_at }}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary"
+                            onclick='previewHistory({
+                                subject: {{ row.subject|tojson }},
+                                content: {{ row.content|tojson }},
+                                type: {{ row.content_type|tojson }}
+                            })'>
+                        Preview
+                    </button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    No emails sent yet
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if send_id %}
+<div class="card mb-4" id="progressCard">
+    <div class="card-header">
+        <h4>Sending Progress</h4>
+    </div>
+    <div class="card-body">
+        <div class="progress mb-3">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+        <p id="progressText">Sending... 0 / 0</p>
+        <div class="mt-3">
+            <button class="btn btn-danger btn-sm" onclick="abortSend()">Abort Sending</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+</div>
+</section>
+</div>
+
+</div>
+</div>
+
+<!-- ===================== SEND NEW MODAL ===================== -->
+<div class="modal fade" id="sendModal" tabindex="-1">
+<div class="modal-dialog modal-lg modal-dialog-scrollable">
+<div class="modal-content">
+
+<form method="POST">
+
+<div class="modal-header">
+    <h5 class="modal-title">Send Newsletter</h5>
+    <button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+
+<div class="mb-3">
+    <label>Subject *</label>
+    <input type="text" name="subject" id="subject" class="form-control" required>
+</div>
+
+<div class="mb-3">
+    <label>Email Format *</label>
+    <select name="content_type" id="content_type" class="form-control">
+        <option value="html">HTML (Rich)</option>
+        <option value="plain">Plain Text</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label>Send Limit (optional, for safety)</label>
+    <input type="number" name="send_limit" id="send_limit" class="form-control" min="1" placeholder="Leave empty to send to all">
+</div>
+
+<label>Content *</label>
+<textarea name="description" id="description" class="form-control" rows="10" required></textarea>
+
+<div class="form-text">Note: There may be limitations on the number of emails you can send per day/hour from your email provider. Use the send limit for testing.</div>
+
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" onclick="previewDraft()">
+        Preview
+    </button>
+    <button type="submit" class="btn btn-success">
+        Send Mail
+    </button>
+</div>
+
+</form>
+
+</div>
+</div>
+</div>
+
+<!-- ===================== PREVIEW MODAL ===================== -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+<div class="modal-content">
+
+<div class="modal-header">
+    <h5 id="previewSubject"></h5>
+    <button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <div id="previewContent" class="preview-box"></div>
+</div>
+
+</div>
+</div>
+</div>
+
+            {% include 'admin/head_foot/script.html' %}
+
+<script>
+function previewDraft() {
+    document.getElementById('previewSubject').innerText =
+        document.getElementById('subject').value || 'No Subject';
+
+    let content = document.getElementById('description').value || 'No content';
+    // Sanitize HTML for safe display
+    content = content.replace(/<script[^>]*>.*?<\/script>/gi, '');
+    content = content.replace(/<style[^>]*>.*?<\/style>/gi, '');
+    document.getElementById('previewContent').innerHTML = content;
+
+    new bootstrap.Modal(document.getElementById('previewModal')).show();
+}
+
+/* ===================== PREVIEW HISTORY ===================== */
+function previewHistory(data) {
+    document.getElementById('previewSubject').innerText = data.subject;
+
+    let content = data.type === 'html'
+        ? data.content
+        : `<pre style="white-space:pre-wrap">${data.content}</pre>`;
+    // Sanitize HTML for safe display
+    if (data.type === 'html') {
+        content = content.replace(/<script[^>]*>.*?<\/script>/gi, '');
+        content = content.replace(/<style[^>]*>.*?<\/style>/gi, '');
+    }
+    document.getElementById('previewContent').innerHTML = content;
+
+    new bootstrap.Modal(document.getElementById('previewModal')).show();
+}
+
+/* ===================== MODAL CLEANUP ===================== */
+document.getElementById('sendModal').addEventListener('hidden.bs.modal', () => {
+    document.getElementById('subject').value = '';
+    document.getElementById('description').value = '';
+    document.getElementById('content_type').value = 'html';
+    document.getElementById('send_limit').value = '';
+});
+
+</script>
+</body>
+
+</html>

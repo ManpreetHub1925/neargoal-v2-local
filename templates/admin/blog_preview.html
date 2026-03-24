@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ blog.title }} | Preview</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Prevent indexing -->
+    <meta name="robots" content="noindex, nofollow">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+            background: #f8f9fa;
+            color: #212529;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 6px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.08);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+
+        .badge-draft {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .badge-published {
+            background: #198754;
+            color: #fff;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 32px;
+        }
+
+        .meta {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+
+        .content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-20deg);
+            font-size: 72px;
+            color: rgba(220,53,69,.15);
+            font-weight: 800;
+            pointer-events: none;
+            user-select: none;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+{% if blog.status != 'published' %}
+<div class="watermark">DRAFT</div>
+{% endif %}
+
+<div class="container">
+
+    {% if blog.status == 'published' %}
+        <span class="badge badge-published">Published</span>
+    {% else %}
+        <span class="badge badge-draft">Draft Preview</span>
+    {% endif %}
+
+    <h1>{{ blog.title }}</h1>
+
+    <div class="meta">
+        {% if blog.category_name %}
+            Category: <strong>{{ blog.category_name }}</strong> ·
+        {% endif %}
+        Slug: <code>{{ blog.slug }}</code>
+    </div>
+
+    <hr>
+
+{% if blog.featured_image %}
+<div class="img" style="margin-bottom: 20px;">
+    <img src="{{ url_for('static', filename=blog.featured_image) }}"
+         alt="{{ blog.title }}"
+         style="width:100%; height:auto; border-radius:6px;"
+         loading="lazy">
+</div>
+{% endif %}
+
+<div class="content">
+    {{ blog.content | safe }}
+</div>
+
+</div>
+
+</body>
+</html>

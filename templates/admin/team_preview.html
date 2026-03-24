@@ -1,0 +1,13 @@
+<div style="padding:30px;font-family:system-ui">
+    <h3>{{ member.name }}</h3>
+    <p><strong>{{ member.designation }}</strong> – {{ member.department }}</p>
+
+    {% if member.profile_image %}
+        <img src="{{ url_for('static', filename=member.profile_image) }}"
+             style="max-width:200px;border-radius:8px;">
+    {% endif %}
+
+    <p class="mt-3">{{ member.bio }}</p>
+
+    <p><strong>Email:</strong> {{ member.email }}</p>
+</div>

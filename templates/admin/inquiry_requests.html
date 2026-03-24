@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Inquiry Requests</title>
+    {% include 'admin/head_foot/style.html' %}
+</head>
+<body>
+<div id="app">
+    <div class="main-wrapper">
+        <div class="navbar-bg"></div>
+        {% include 'admin/head_foot/head.html' %}
+        <div class="main-content">
+            <section class="section">
+                <div class="section-header"><h1>Inquiry Requests</h1></div>
+                <div class="section-body">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <form method="GET" class="row g-2">
+                                <div class="col-md-8"><input class="form-control" name="q" value="{{ q or '' }}" placeholder="Search"></div>
+                                <div class="col-md-2">
+                                    <select class="form-select" name="status">
+                                        <option value="">All status</option>
+                                        {% for s in ['new','contacted','qualified','closed'] %}
+                                        <option value="{{ s }}" {% if selected_status == s %}selected{% endif %}>{{ s|capitalize }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-grid"><button class="btn btn-primary">Filter</button></div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body table-responsive">
+                            <table class="table table-striped align-middle">
+                                <thead><tr><th>#</th><th>Type</th><th>Lead</th><th>Context</th><th>Message</th><th>Status</th><th>Date</th></tr></thead>
+                                <tbody>
+                                {% for row in requests %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ row.inquiry_type }}</td>
+                                    <td><strong>{{ row.full_name }}</strong><br><small>{{ row.email }}</small><br><small>{{ row.phone or '-' }}</small></td>
+                                    <td><small>Company: {{ row.company or '-' }}<br>Industry: {{ row.industry_slug or '-' }}<br>Report: {{ row.report_slug or '-' }}<br>Source: {{ row.source_page or '-' }}</small></td>
+                                    <td><small>{{ row.message or '-' }}</small></td>
+                                    <td>
+                                        <form method="POST" class="d-flex gap-1">
+                                            <input type="hidden" name="id" value="{{ row.id }}">
+                                            <select name="status" class="form-select form-select-sm">
+                                                {% for s in ['new','contacted','qualified','closed'] %}
+                                                <option value="{{ s }}" {% if row.status == s %}selected{% endif %}>{{ s|capitalize }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button class="btn btn-sm btn-outline-primary">Save</button>
+                                        </form>
+                                    </td>
+                                    <td><small>{{ row.created_at }}</small></td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="7" class="text-center py-4">No inquiries found.</td></tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        {% include 'admin/head_foot/script.html' %}
+    </div>
+</div>
+</body>
+</html>

@@ -251,7 +251,7 @@ REPORTS = [
         "price": 3200,
         "pages": 120,
         "coverage": "Regional",
-        "description": "This report examines the shift towards sustainable packaging in Europe, driven by the EU Green Deal and changing consumer preferences.",
+        "description": "This report examines the shift towards sustainable packaging in Europe, driven by the EU Green Deal and changing consumer preferences. The study provides a comprehensive analysis of the regulatory framework, material innovations, and market dynamics shaping the industry. We explore how major FMCG brands are transitioning away from single-use plastics towards biodegradable and easily recyclable alternatives. The analysis includes detailed market sizing, growth forecasts, and competitive benchmarking of key players. Furthermore, the report delves into consumer sentiment across different European regions, identifying the primary drivers and barriers to adoption. By integrating primary research with advanced data modeling, we provide strategic insights into the technological inflection points that will define the next decade of sustainable packaging in the EU.",
         "toc": [
             "Regulatory Landscape (PPWR)",
             "Material Innovation",
@@ -279,7 +279,7 @@ REPORTS = [
         "price": 4800,
         "pages": 165,
         "coverage": "Regional",
-        "description": "A detailed analysis of the semiconductor equipment market in APAC, covering lithography, deposition, etching, and packaging technologies.",
+        "description": "A detailed analysis of the semiconductor equipment market in APAC, covering lithography, deposition, etching, and packaging technologies. This comprehensive research evaluates the rapid expansion of manufacturing capacity across China, Taiwan, South Korea, and Japan. We examine the impact of geopolitical tensions on supply chain resilience and the strategic shift towards regionalized production. The report provides granular data on market share for leading equipment vendors and analyzes emerging technology trends such as EUV lithography and advanced 3D packaging. With the rise of AI-driven demand, the semiconductor ecosystem is undergoing a structural transformation, and this study offers decision-oriented intelligence for stakeholders navigating this complex landscape. Our analysis includes cost structures, application shifts, and a forward-looking outlook on capital expenditure patterns in the region for the coming five years.",
         "toc": [
             "Semiconductor Industry Outlook",
             "Wafer Fab Equipment Market",

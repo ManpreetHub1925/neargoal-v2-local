@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% include 'admin/head_foot/style.html' %}
+</head>
+
+<body>
+    <div id="app">
+        <div class="main-wrapper">
+
+            <div class="navbar-bg"></div>
+            {% include 'admin/head_foot/head.html' %}
+
+            <div class="main-content">
+                <section class="section">
+
+                    <div class="section-header">
+                        <h1>Email Configuration</h1>
+                        <div class="section-header-breadcrumb">
+                            <div class="breadcrumb mb-0">
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                                </div>
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.settings') }}">Settings</a>
+                                </div>
+                                <div class="breadcrumb-item active" aria-current="page">Email Configuration</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-body">
+                        <div class="row">
+
+                            <!-- LEFT TABS -->
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <ul class="nav nav-pills flex-column">
+                                            <li class="nav-item">
+                                                <a class="nav-link active" data-bs-toggle="tab"
+                                                    href="#smtp_tab">Settings</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" data-bs-toggle="tab" href="#templates_tab">Email
+                                                    Templates</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- RIGHT CONTENT -->
+                            <div class="col-md-9">
+                                <div class="tab-content">
+
+                                    <!-- ================= SMTP SETTINGS ================= -->
+                                    <div class="tab-pane fade show active" id="smtp_tab">
+                                        <div class="card">
+                                            <div class="card-body">
+
+
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label>Mail Host</label>
+                                                        <input class="form-control" name="mail_host"
+                                                            value="{{ settings.host }}"
+                                                            placeholder="{{ settings.host }}" disabled>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label>Mail Port</label>
+                                                        <input class="form-control" name="mail_port"
+                                                            value="{{ settings.port }}"
+                                                            placeholder="{{ settings.port }}" disabled>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label>SMTP Username</label>
+                                                        <input class="form-control" name="mail_username"
+                                                            value="{{ settings.username }}"
+                                                            placeholder="{{ session.get('username') }}" disabled>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label>SMTP Password</label>
+                                                        <input type="password" class="form-control" name="mail_password"
+                                                            placeholder="********" disabled>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label>Sender Name</label>
+                                                        <input class="form-control" name="mail_from_name"
+                                                            value="{{ settings.mail_from_name }}"
+                                                            placeholder="{{ settings.mail_from_name }}" disabled>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label>Sender Email</label>
+                                                        <input class="form-control" name="mail_from_email"
+                                                            value="{{ settings.mail_from_email }}"
+                                                            placeholder="{{ settings.mail_from_email }}" disabled>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label>Encryption</label>
+                                                        <input class="form-control" name="mail_encryption"
+                                                            value="{{ settings.encryption }}"
+                                                            placeholder="{{ settings.encryption }}" disabled>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ================= EMAIL TEMPLATES ================= -->
+                                    <div class="tab-pane fade" id="templates_tab">
+                                        <div class="card">
+                                            <div class="card-body">
+
+                                                <button class="btn btn-primary mb-3" data-bs-toggle="modal"
+                                                    data-bs-target="#templateModal" onclick="openCreateTemplate()">
+                                                    <i class="fa fa-plus"></i> Create Template
+                                                </button>
+
+                                                <table class="table table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Name</th>
+                                                            <th>Key</th>
+                                                            <th>Subject</th>
+                                                            <th>Status</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    {% for template in templates %}
+                                                    <tr data-id="{{ template.id }}" data-name="{{ template.name }}"
+                                                        data-key="{{ template.template_key }}"
+                                                        data-subject="{{ template.subject }}"
+                                                        data-body="{{ template.body_html }}"
+                                                        data-active="{{ template.is_active }}">
+                                                        <td>{{ loop.index }}</td>
+                                                        <td>{{ template.name }}</td>
+                                                        <td><code>{{ template.template_key }}</code></td>
+                                                        <td>{{ template.subject }}</td>
+                                                        <td>
+                                                            {% if template.is_active %}
+                                                            <span class="badge bg-success">Active</span>
+                                                            {% else %}
+                                                            <span class="badge bg-danger">Inactive</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+
+                                                            <button class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                                                data-bs-target="#previewModal"
+                                                                onclick="previewTemplate({{ template.id }})">
+                                                                <i class="fa fa-eye"></i>
+                                                            </button>
+
+                                                            <button class="btn btn-sm btn-warning"
+                                                                data-bs-toggle="modal" data-bs-target="#templateModal"
+                                                                onclick="editTemplate({{ template.id }})">
+                                                                <i class="fa fa-edit"></i>
+                                                            </button>
+
+                                                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                                                data-bs-target="#deleteModal"
+                                                                onclick="setDeleteUrl('{{ url_for('admin.delete_email_template', template_id=template.id) }}')">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </table>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                </section>
+            </div>
+
+
+
+                          <!-- ADD/EDIT FORM for Templates -->
+
+            <div class="modal fade" id="templateModal" tabindex="-1" role="dialog" aria-labelledby="templateModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="templateModalLabel">Create/Edit Email Template</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="templateForm" method="POST" action="{{ url_for('admin.email_config') }}">
+                            <div class="modal-body">
+                                <input type="hidden" name="template_id" id="template_id">
+                                <div class="mb-3">
+                                    <label for="template_name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="template_name" name="template_name"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="template_key" class="form-label">Key</label>
+                                    <input type="text" class="form-control" id="template_key" name="template_key"
+                                        readonly required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="template_subject" class="form-label">Subject</label>
+                                    <input type="text" class="form-control" id="template_subject"
+                                        name="template_subject" required>
+                                    <div class="mt-1">
+                                        <small>Insert Fields:</small>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertField('template_subject', '{{name}}')">Name</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertField('template_subject', '{{email}}')">Email</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="insertField('template_subject', '{{company}}')">Company</button>
+                                    </div>
+                                </div>
+
+
+                                <div class="mb-3">
+                                    <label>HTML Body</label>
+                                    <textarea name="template_body" id="template_body" class="form-control" style="height:200px"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label>Insert Fields:</label><br>
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="insertField('template_body', '{{name}}')">Name</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="insertField('template_body', '{{email}}')">Email</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="insertField('template_body', '{{company}}')">Company</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="insertField('template_body', '{{message}}')">Message</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="insertField('template_body', '{{date}}')">Date</button>
+                                </div>
+
+                                <div class="form-check form-switch mt-3">
+                                    <input type="hidden" name="is_active" value="0">
+                                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active"
+                                        value="1" checked>
+                                    <label class="form-check-label">Active</label>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PREVIEW OF EMAIL TEMPLATE -->
+            <div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="previewModalLabel">Email Template Preview</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="previewContent" class="email-preview border rounded p-3 bg-light">
+                                <div class="email-header mb-3">
+                                    <div class="row">
+                                        <div class="col-sm-3"><strong>Template Key:</strong></div>
+                                        <div class="col-sm-9" id="previewKey"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3"><strong>Name:</strong></div>
+                                        <div class="col-sm-9" id="previewName"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3"><strong>Subject:</strong></div>
+                                        <div class="col-sm-9" id="previewSubject"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3"><strong>Status:</strong></div>
+                                        <div class="col-sm-9" id="previewStatus"></div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="email-body">
+                                    <strong>Body:</strong>
+                                    <div id="previewBody" class="mt-2 p-2 border bg-white"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ================= Delete Record ================= -->
+            <div class="modal fade" id="deleteModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Delete</h5>
+                            <button class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            Are you sure you want to delete this record?
+                        </div>
+
+                        <div class="modal-footer">
+                            <form id="deleteForm" method="POST">
+                                <button type="submit" class="btn btn-danger">
+                                    Yes, Delete
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cancel
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+            {% include 'admin/head_foot/script.html' %}
+
+
+            <script>
+                function openCreateTemplate() {
+                    document.getElementById('templateForm').reset();
+                    document.getElementById('template_id').value = '';
+                    document.getElementById('templateModalLabel').innerText = 'Create Email Template';
+
+                    // Generate auto key
+                    const key = 'templ_' + Date.now().toString(36);
+                    document.getElementById('template_key').value = key;
+
+                    // Reset Quill content after modal is shown
+                    modalEl.addEventListener('shown.bs.modal', function handler() {
+                        quill.setContents([]);
+                        modalEl.removeEventListener('shown.bs.modal', handler);
+                    });
+                }
+
+                function editTemplate(id) {
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    document.getElementById('template_id').value = row.dataset.id;
+                    document.getElementById('template_name').value = row.dataset.name;
+                    document.getElementById('template_key').value = row.dataset.key;
+                    document.getElementById('template_subject').value = row.dataset.subject;
+                    document.getElementById('template_body').value = row.dataset.body;
+                    document.getElementById('is_active').checked = row.dataset.active === '1';
+                    document.getElementById('templateModalLabel').innerText = 'Edit Email Template';
+                }
+
+                function previewTemplate(id) {
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    const name = row.dataset.name;
+                    const key = row.dataset.key;
+                    const subject = row.dataset.subject;
+                    const body = row.dataset.body;
+                    const active = row.dataset.active === '1';
+
+                    document.getElementById('previewKey').innerText = key;
+                    document.getElementById('previewName').innerText = name;
+                    document.getElementById('previewSubject').innerText = subject;
+                    document.getElementById('previewStatus').innerHTML = active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>';
+                    document.getElementById('previewBody').innerHTML = body;
+                }
+
+                function insertField(elementId, field) {
+                    const element = document.getElementById(elementId);
+                    const start = element.selectionStart;
+                    const end = element.selectionEnd;
+                    const text = element.value;
+                    const before = text.substring(0, start);
+                    const after = text.substring(end, text.length);
+                    element.value = before + field + after;
+                    element.focus();
+                    element.setSelectionRange(start + field.length, start + field.length);
+                }
+            </script>
+
+
+
+            <script>
+                function setDeleteUrl(url) {
+                    document.getElementById('deleteForm').action = url;
+                }
+            </script>
+
+            <!-- Quill for Email Template -->
+            <!-- <script>
+                let quill = null;
+
+                const modalEl = document.getElementById('templateModal');
+
+                modalEl.addEventListener('shown.bs.modal', () => {
+                    if (!quill) {
+                        quill = new Quill('#editor', {
+                            theme: 'snow',
+                            modules: {
+                                toolbar: {
+                                    container: '#editor-toolbar'
+                                }
+                            }
+                        });
+                    }
+                });
+
+                // Sync content on submit
+                document.querySelector('#templateForm').addEventListener('submit', () => {
+                    document.getElementById('template_body').value = quill.root.innerHTML;
+                });
+            </script> -->
+
+
+</body>
+
+</html>

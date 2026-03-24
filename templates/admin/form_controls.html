@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Form Controls</title>
+    {% include 'admin/head_foot/style.html' %}
+</head>
+<body>
+<div id="app">
+    <div class="main-wrapper">
+        <div class="navbar-bg"></div>
+        {% include 'admin/head_foot/head.html' %}
+        <div class="main-content">
+            <section class="section">
+                <div class="section-header">
+                    <h1>Website Form Controls</h1>
+                </div>
+                <div class="section-body">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <form method="GET" class="row g-2 align-items-end">
+                                <div class="col-md-6">
+                                    <label class="form-label">Select Form</label>
+                                    <select class="form-control form-select" name="form_key" onchange="this.form.submit()">
+                                        {% for key, label in form_labels.items() %}
+                                        <option value="{{ key }}" {% if selected_form == key %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body table-responsive">
+                            <form method="POST">
+                                <input type="hidden" name="form_key" value="{{ selected_form }}">
+                                <table class="table table-bordered align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Field Key</th>
+                                            <th>Label</th>
+                                            <th>Placeholder</th>
+                                            <th>Input Type</th>
+                                            <th>Options (one per line)</th>
+                                            <th>Enabled</th>
+                                            <th>Required</th>
+                                            <th>Order</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for field in controls %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ field.field_key }}</strong>
+                                                <input type="hidden" name="field_id[]" value="{{ field.id }}">
+                                            </td>
+                                            <td><input class="form-control" type="text" name="label[]" value="{{ field.label }}"></td>
+                                            <td><input class="form-control" type="text" name="placeholder[]" value="{{ field.placeholder }}"></td>
+                                            <td>
+                                                <select class="form-control form-select" name="input_type[]">
+                                                    {% for t in ['text', 'email', 'tel', 'number', 'textarea', 'select', 'file'] %}
+                                                    <option value="{{ t }}" {% if field.input_type == t %}selected{% endif %}>{{ t }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                            <td><textarea class="form-control" rows="3" name="options[]">{{ field.options_raw }}</textarea></td>
+                                            <td class="text-center"><input type="checkbox" name="is_enabled_{{ field.id }}" value="1" {% if field.is_enabled %}checked{% endif %}></td>
+                                            <td class="text-center"><input type="checkbox" name="is_required_{{ field.id }}" value="1" {% if field.is_required %}checked{% endif %}></td>
+                                            <td><input class="form-control" type="number" name="display_order[]" value="{{ field.display_order }}"></td>
+                                        </tr>
+                                        {% else %}
+                                        <tr><td colspan="8" class="text-center py-4">No fields available for this form.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <button class="btn btn-primary" type="submit">Save Form Controls</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        {% include 'admin/head_foot/script.html' %}
+    </div>
+</div>
+</body>
+</html>

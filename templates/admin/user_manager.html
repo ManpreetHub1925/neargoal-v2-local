@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% include 'admin/head_foot/style.html' %}
+</head>
+
+<body>
+    <div id="app">
+        <div class="main-wrapper">
+
+            <div class="navbar-bg"></div>
+            {% include 'admin/head_foot/head.html' %}
+
+
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header">
+                        <h1>Manage Roles</h1>
+                        <div class="section-header-breadcrumb">
+                            <div class="breadcrumb mb-0">
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                                </div>
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.settings') }}">Settings</a>
+                                </div>
+                                <div class="breadcrumb-item active" aria-current="page">Manage Roles</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <!-- USER MANAGER PAGE (Popup Create User Form) -->
+
+                                    <div class="card-header d-flex justify-content-between">
+                                        <h4>User Manager</h4>
+                                        <div>
+                                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#createUserModal_form">
+                                                <i class="fa fa-plus"></i> Add New User
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Full Name</th>
+                                                        <th>Email</th>
+                                                        <th>Role</th>
+                                                        <th>Status</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for user in logins %}
+                                                    <tr>
+                                                        <td>{{ loop.index }}</td>
+                                                        <td>{{ user.full_name }}</td>
+                                                        <td>{{ user.email }}</td>
+                                                        <td>{{ user.role }}</td>
+                                                        <td>
+                                                            {% if user.is_active == 1 %}
+                                                            <span class="badge badge-success">Active</span>
+                                                            {% else %}
+                                                            <span class="badge badge-danger">Inactive</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            <a href="javascript:void(0)" class="btn btn-sm btn-danger"
+                                                                data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                                onclick="setDeleteUrl('{{ url_for('admin.delete_user', user_id=user.id) }}')">
+                                                                Delete
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    {% else %}
+                                                    <tr>
+                                                        <td colspan="6" class="text-center py-5">
+                                                            <img src="{{ url_for('static', filename='admin/assets/img/empty-box.webp') }}"
+                                                                width="200">
+                                                            <h4 class="py-2">No users found!</h4>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+
+            <!-- CREATE USER MODAL (FIXED & INTERACTABLE) -->
+            <div class="modal fade" id="createUserModal_form" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+
+                        <!-- ✅ MODAL HEADER (IMPORTANT for Bootstrap focus handling) -->
+                        <div class="modal-header">
+                            <h5 class="modal-title">Create New User</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <form method="POST" action="{{ url_for('admin.manage_logins') }}" enctype="multipart/form-data">
+
+
+
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label>Full Name</label>
+                                        <input type="text" name="full_name" class="form-control" required>
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                        <label>Email</label>
+                                        <input type="email" name="email" class="form-control" required>
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                        <label>Password</label>
+                                        <input type="password" name="password" class="form-control" required>
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                        <label>Role</label>
+                                        <select name="role" class="form-control form-select" required>
+                                            <option value="">Select Role</option>
+                                            <option value="admin">Admin</option>
+                                            <option value="manager">Manager</option>
+                                            <option value="staff">Staff</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                        <label class="d-flex align-items-center mb-0 mt-4">
+                                            <input type="hidden" name="is_active" value="0">
+                                            <input type="checkbox" name="is_active" class="custom-switch-input"
+                                                value="1" checked>
+                                            <span class="custom-switch-indicator"></span>
+                                            <span class="custom-switch-description">Active</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer bg-whitesmoke">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Close
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fa fa-save"></i> Create User
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- DELETE CONFIRMATION MODAL (BOOTSTRAP 4 – FIXED) -->
+            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">User Delete Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete this user?</p>
+                        </div>
+
+                        <div class="modal-footer bg-whitesmoke br">
+                            <form id="deleteForm" method="POST" action="">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                    Close
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Yes, Delete
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            {% include 'admin/head_foot/script.html' %}
+
+            <script>
+                function setDeleteUrl(url) {
+                    document.getElementById('deleteForm').action = url;
+                }
+            </script>
+
+</body>
+
+</html>

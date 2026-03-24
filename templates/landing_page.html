@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white min-h-screen">
+  <section class="relative bg-slate-900 text-white py-24 overflow-hidden">
+    {% if page.banner_url %}
+    <div class="absolute inset-0 z-0">
+      <img src="{{ page.banner_url }}" alt="{{ page.title }}" class="w-full h-full object-cover opacity-25" referrerpolicy="no-referrer" />
+      <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-900/70"></div>
+    </div>
+    {% endif %}
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6">{{ page.hero_title or page.title }}</h1>
+      {% if page.hero_subtitle %}
+      <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">{{ page.hero_subtitle }}</p>
+      {% endif %}
+      {% if page.cta_text and page.cta_url %}
+      <div class="mt-8">
+        <a href="{{ page.cta_url }}" class="inline-flex items-center justify-center px-8 py-3 rounded-md bg-sky-600 hover:bg-sky-500 text-white font-medium transition-colors">
+          {{ page.cta_text }}
+          <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="py-16 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 md:p-12">
+        <div class="prose prose-slate max-w-none">
+          {{ page.content|safe }}
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

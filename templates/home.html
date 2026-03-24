@@ -3,23 +3,24 @@
 {% block content %}
 <div class="bg-white">
   <section class="relative bg-slate-900 text-white py-[55px] overflow-hidden">
-    <div class="absolute inset-0 z-0 opacity-20 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');"></div>
+    <div class="absolute inset-0 z-0 opacity-20 bg-cover bg-center" style="background-image: url('{{ hero_slide.banner_url if hero_slide and hero_slide.banner_url else 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop' }}');"></div>
     <div class="absolute inset-0 z-10 bg-gradient-to-r from-slate-900 via-slate-900/90 to-transparent"></div>
     <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight">
-          Research That Brings You Closer to Your <span class="text-sky-400">Business Goals</span>
+          {% if hero_slide and hero_slide.hero_title %}
+          {{ hero_slide.hero_title|replace('Business Goals', '<span class="text-sky-400 whitespace-nowrap">Business Goals</span>')|safe }}
+          {% else %}
+          Research That Brings You Closer to Your <span class="text-sky-400 whitespace-nowrap">Business Goals</span>
+          {% endif %}
         </h1>
         <p class="text-lg md:text-xl text-slate-300 mb-8 leading-relaxed max-w-2xl">
-          Neargoal Consulting delivers deep, analyst-driven market research and strategic intelligence across high-impact global industries.
+          {{ hero_slide.hero_subtitle if hero_slide and hero_slide.hero_subtitle else 'Neargoal Consulting delivers deep, analyst-driven market research and strategic intelligence across high-impact global industries.' }}
         </p>
         <div class="flex flex-col sm:flex-row gap-4">
-          <a href="{{ url_for('contact') }}" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-sky-600 hover:bg-sky-500 transition-colors shadow-lg shadow-sky-900/20">
-            Contact Us
+          <a href="{{ hero_slide.cta_url if hero_slide and hero_slide.cta_url else url_for('contact') }}" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-sky-600 hover:bg-sky-500 transition-colors shadow-lg shadow-sky-900/20">
+            {{ hero_slide.cta_text if hero_slide and hero_slide.cta_text else 'Get in Touch' }}
             <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
-          </a>
-          <a href="{{ url_for('contact') }}" class="inline-flex items-center justify-center px-8 py-3 border border-slate-600 text-base font-medium rounded-md text-slate-200 hover:bg-slate-800 transition-colors">
-            Request Sample
           </a>
         </div>
       </div>
@@ -30,7 +31,8 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <form action="{{ url_for('market_intelligence') }}" method="get" class="relative shadow-sm">
         
-        <input type="text" name="search" class="block w-full pl-12 pr-32 py-4 border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-lg shadow-md transition-shadow" placeholder="Search Reports, Corporate Developments & PRs..." />
+        <input type="text" name="search" class="block w-full pl-12 pr-32 py-4 border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 sm:text-lg shadow-md transition-shadow" placeholder="Search Industry Reports..." data-autocomplete="reports" />
+        <div class="autocomplete-dropdown absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto hidden"></div>
         <button type="submit" class="absolute inset-y-2 right-2 px-6 bg-slate-900 text-white rounded-md hover:bg-slate-800 transition-colors font-medium">
           Search
         </button>
@@ -146,7 +148,7 @@
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">{{ report.industry.name }}</span>
             </div>
             <h3 class="text-lg font-bold text-slate-900 mb-2 line-clamp-2 h-14">
-              <a href="{{ url_for('report_detail', industry_slug=report.industry.slug, report_id=report.id) }}" class="hover:text-sky-600 transition-colors">{{ report.title }}</a>
+              <a href="{{ url_for('report_detail', industry_slug=report.industry.slug, report_slug=report.slug) }}" class="hover:text-sky-600 transition-colors">{{ report.title }}</a>
             </h3>
             <p class="text-slate-600 text-sm mb-4 line-clamp-3 flex-grow">{{ report.summary }}</p>
             <div class="flex items-center justify-between text-xs text-slate-500 font-medium mt-auto pt-4 border-t border-slate-100">
@@ -156,7 +158,7 @@
               </span>
               <span class="font-bold text-slate-900">${{ report.price }}</span>
             </div>
-            <a href="{{ url_for('report_detail', industry_slug=report.industry.slug, report_id=report.id) }}" class="mt-4 w-full flex items-center justify-center px-4 py-2 border border-sky-600 text-sm font-medium rounded-md text-sky-600 bg-white hover:bg-sky-50 transition-colors">
+            <a href="{{ url_for('report_detail', industry_slug=report.industry.slug, report_slug=report.slug) }}" class="mt-4 w-full flex items-center justify-center px-4 py-2 border border-sky-600 text-sm font-medium rounded-md text-sky-600 bg-white hover:bg-sky-50 transition-colors">
               View Report
               <i data-lucide="arrow-right" class="ml-2 w-4 h-4"></i>
             </a>

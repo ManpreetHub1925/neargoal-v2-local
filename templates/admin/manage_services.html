@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" href="" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+
+    <title>Dashboard</title>
+    {% include 'admin/head_foot/style.html' %}
+</head>
+
+<body>
+    <div id="app">
+        <div class="main-wrapper">
+
+            <div class="navbar-bg"></div>
+
+            {% include 'admin/head_foot/head.html' %}
+
+
+
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header">
+                        <h1>Service List</h1>
+                        <div class="section-header-breadcrumb">
+                            <div class="breadcrumb mb-0">
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                                </div>
+                                <div class="breadcrumb-item active" aria-current="page">Service List</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="mt-4 row">
+
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body py-3">
+                                        <form action="{{ url_for('admin.manage_services') }}" method="GET" class="row g-3 align-items-center">
+                                            <div class="col-md-4">
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                    <input type="text" name="keyword" value="{{ keyword }}" class="form-control border-start-0 ps-0" placeholder="Search services...">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <select name="status" id="status" class="form-select">
+                                                    <option value="">All Status</option>
+                                                    <option value="1" {% if status=='1' %}selected{% endif %}>Active</option>
+                                                    <option value="0" {% if status=='0' %}selected{% endif %}>Inactive</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <select name="order_by" id="order_by" class="form-select">
+                                                    <option value="">Order By</option>
+                                                    <option value="1" {% if order_by=='1' %}selected{% endif %}>ASC</option>
+                                                    <option value="0" {% if order_by=='0' %}selected{% endif %}>DESC</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <select name="par-page" id="par-page" class="form-select">
+                                                    <option value="">Per Page</option>
+                                                    <option value="10" {% if per_page=='10' %}selected{% endif %}>10</option>
+                                                    <option value="50" {% if per_page=='50' %}selected{% endif %}>50</option>
+                                                    <option value="100" {% if per_page=='100' %}selected{% endif %}>100</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 d-flex gap-2">
+                                                <button class="btn btn-primary w-100" type="submit">Filter</button>
+                                                <a href="{{ url_for('admin.manage_services') }}" class="btn btn-outline-secondary">Reset</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between">
+                                        <h4>Service List</h4>
+                                        <div>
+                                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#serviceModal" onclick="openAddModal()">
+                                                <i class="fa fa-plus"></i> Add Service
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped align-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="5%">#</th>
+                                                        <th width="8%">Icon</th>
+                                                        <th width="12%">Banner</th>
+                                                        <th>Service Details</th>
+                                                        <th width="15%">Group</th>
+                                                        <th width="10%">Status</th>
+                                                        <th width="15%">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for service in services %}
+                                                    <tr>
+                                                        <td>{{ loop.index }}</td>
+
+                                                        <td class="text-center">
+                                                            {% if service.icon %}
+                                                            <div class="bg-light rounded p-2 d-inline-block border">
+                                                                <i class="{{ service.icon }} text-primary fs-5"></i>
+                                                            </div>
+                                                            {% else %}
+                                                            <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                        <td>
+                                                            {% if service.banner_image %}
+                                                            <img src="{{ url_for('static', filename=service.banner_image.replace('static/','')) }}"
+                                                                width="80" class="rounded border shadow-sm" style="height: 40px; object-fit: cover;">
+                                                            {% else %}
+                                                            <div class="bg-light rounded border d-flex align-items-center justify-content-center text-muted" style="width: 80px; height: 40px;">
+                                                                <i class="far fa-image"></i>
+                                                            </div>
+                                                            {% endif %}
+                                                        </td>
+
+                                                        <td>
+                                                            <div class="fw-bold">{{ service.service_name }}</div>
+                                                            <small class="text-muted"><code>/{{ service.slug }}</code></small>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-light text-dark border">{{ service.service_group or '-' }}</span>
+                                                        </td>
+
+                                                        <td>
+                                                            <div class="form-check form-switch p-0">
+                                                                <input type="checkbox" class="form-check-input ms-0 service-status-toggle" 
+                                                                    data-id="{{ service.id }}" {% if service.is_active %}checked{% endif %}>
+                                                            </div>
+                                                        </td>
+
+                                                        <td>
+                                                            <div class="d-flex gap-2">
+                                                                <button class="btn btn-sm btn-outline-info" 
+                                                                    onclick='previewService(this)'
+                                                                    data-id="{{ service.id }}"
+                                                                    data-title="{{ service.service_name|escape }}"
+                                                                    data-slug="{{ service.slug }}"
+                                                                    data-icon="{{ service.icon or '' }}"
+                                                                    data-banner="{{ service.banner_image or '' }}"
+                                                                    data-short-desc="{{ service.short_description|escape if service.short_description else '' }}"
+                                                                    data-desc="{{ service.description|escape if service.description else '' }}"
+                                                                    data-price="{{ service.starting_price or 0 }}"
+                                                                    data-note="{{ service.price_note|escape if service.price_note else '' }}"
+                                                                    data-group="{{ service.service_group|escape if service.service_group else '' }}"
+                                                                    data-subs="{{ service.industry_subcategories|escape if service.industry_subcategories else '' }}"
+                                                                    data-seo-title="{{ service.seo_title|escape if service.seo_title else '' }}"
+                                                                    data-seo-keyword="{{ service.seo_keywords|escape if service.seo_keywords else '' }}"
+                                                                    data-seo-desc="{{ service.seo_description|escape if service.seo_description else '' }}"
+                                                                    data-order="{{ service.display_order or 0 }}"
+                                                                    data-featured="{{ 1 if service.is_featured else 0 }}"
+                                                                    data-active="{{ 1 if service.is_active else 0 }}"
+                                                                    data-created="{{ service.created_at }}"
+                                                                    data-updated="{{ service.updated_at }}" title="Preview">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+
+                                                                <button class="btn btn-sm btn-outline-warning"
+                                                                    onclick='editService(this)'
+                                                                    data-id="{{ service.id }}"
+                                                                    data-title="{{ service.service_name|escape }}"
+                                                                    data-slug="{{ service.slug }}"
+                                                                    data-icon="{{ service.icon or '' }}"
+                                                                    data-banner="{{ service.banner_image or '' }}"
+                                                                    data-short-desc="{{ service.short_description|escape if service.short_description else '' }}"
+                                                                    data-desc="{{ service.description|escape if service.description else '' }}"
+                                                                    data-price="{{ service.starting_price or 0 }}"
+                                                                    data-note="{{ service.price_note|escape if service.price_note else '' }}"
+                                                                    data-group="{{ service.service_group|escape if service.service_group else '' }}"
+                                                                    data-subs="{{ service.industry_subcategories|escape if service.industry_subcategories else '' }}"
+                                                                    data-seo-title="{{ service.seo_title|escape if service.seo_title else '' }}"
+                                                                    data-seo-keyword="{{ service.seo_keywords|escape if service.seo_keywords else '' }}"
+                                                                    data-seo-desc="{{ service.seo_description|escape if service.seo_description else '' }}"
+                                                                    data-order="{{ service.display_order or 0 }}"
+                                                                    data-featured="{{ 1 if service.is_featured else 0 }}"
+                                                                    data-active="{{ 1 if service.is_active else 0 }}" title="Edit">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </button>
+
+                                                                <button class="btn btn-sm btn-outline-danger"
+                                                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                                    onclick="setDeleteUrl('{{ url_for('admin.delete_service', id=service.id) }}')" title="Delete">
+                                                                    <i class="fas fa-trash-alt"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% else %}
+                                                    <tr>
+                                                        <td colspan="7" class="text-center py-5">
+                                                            <img src="{{ url_for('static', filename='admin/assets/img/empty-box.webp') }}"
+                                                                width="200">
+                                                            <h4 class="py-2">No Service found</h4>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="float-right">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+
+
+
+            <!-- ADD / EDIT MODAL -->
+            <div class="modal fade" id="serviceModal" tabindex="-1">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+
+                        <form method="POST" action="{{ url_for('admin.manage_services') }}" id="serviceForm"
+                            enctype="multipart/form-data">
+
+                            <input type="hidden" name="id" id="service_id">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="serviceModalTitle">Create Service</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="row g-3">
+                                    <!-- Section: Basic Information -->
+                                    <div class="col-12">
+                                        <h6 class="text-primary border-bottom pb-2 mb-3 mt-2">Basic Information</h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Service Title *</label>
+                                        <input type="text" name="title" id="service_title" class="form-control" required placeholder="e.g. Market Analysis">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">URL Slug *</label>
+                                        <input type="text" name="slug" id="service_slug" class="form-control" required placeholder="auto-generated-from-title">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Service Group</label>
+                                        <select name="service_group" id="service_group" class="form-select">
+                                            <option value="">Select Service Group</option>
+                                            {% for group in service_groups %}
+                                            <option value="{{ group }}">{{ group }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Icon (Font Awesome class) *</label>
+                                        <div class="input-group">
+                                            <input type="text" name="icon" id="iconUpload" class="form-control" placeholder="fas fa-cogs" required>
+                                            <span class="input-group-text" id="iconLivePreview"><i class="fas fa-question-circle"></i></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label class="form-label">Banner Image</label>
+                                        <div class="image-preview" id="bannerPreview" style="height: 120px;">
+                                            <label for="bannerUpload">Click to Upload Banner</label>
+                                            <input type="file" name="banner_image" id="bannerUpload" accept="image/*">
+                                        </div>
+                                        <small class="text-muted">Recommended size: 1200x400px. Leave blank to keep current.</small>
+                                    </div>
+
+                                    <!-- Section: Pricing & Additional Info -->
+                                    <div class="col-12 mt-4">
+                                        <h6 class="text-primary border-bottom pb-2 mb-3">Pricing & Sub-categories</h6>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">Starting Price</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">₹</span>
+                                            <input type="number" step="0.01" name="starting_price" id="starting_price" class="form-control" value="0">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">Price Note</label>
+                                        <input type="text" name="price_note" id="price_note" class="form-control" placeholder="e.g. per project">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">Display Order</label>
+                                        <input type="number" name="display_order" id="display_order" class="form-control" value="0">
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label class="form-label">Industry Sub-categories</label>
+                                        <textarea name="industry_subcategories" id="industry_subcategories" class="form-control" rows="2" placeholder="Comma-separated list of industries covered"></textarea>
+                                    </div>
+
+                                    <!-- Section: Descriptions -->
+                                    <div class="col-12 mt-4">
+                                        <h6 class="text-primary border-bottom pb-2 mb-3">Content & Descriptions</h6>
+                                    </div>
+
+                                    <div class="col-12 mb-2">
+                                        <label class="form-label">Short Description *</label>
+                                        <div id="short-editor-toolbar" class="mb-2">
+                                            <span class="ql-formats">
+                                                <button class="ql-bold"></button>
+                                                <button class="ql-italic"></button>
+                                                <button class="ql-link"></button>
+                                            </span>
+                                            <span class="ql-formats">
+                                                <button class="ql-list" value="ordered"></button>
+                                                <button class="ql-list" value="bullet"></button>
+                                            </span>
+                                        </div>
+                                        <div id="short-editor" class="report-editor" style="height:150px;"></div>
+                                        <input type="hidden" name="short_description" id="service_short_desc">
+                                    </div>
+
+                                    <div class="col-12 mb-2">
+                                        <label class="form-label">Full Description *</label>
+                                        <div id="desc-editor-toolbar" class="mb-2">
+                                            <span class="ql-formats">
+                                                <select class="ql-header">
+                                                    <option selected></option>
+                                                    <option value="1"></option>
+                                                    <option value="2"></option>
+                                                </select>
+                                            </span>
+                                            <span class="ql-formats">
+                                                <button class="ql-bold"></button>
+                                                <button class="ql-italic"></button>
+                                                <button class="ql-underline"></button>
+                                                <button class="ql-link"></button>
+                                            </span>
+                                            <span class="ql-formats">
+                                                <button class="ql-list" value="ordered"></button>
+                                                <button class="ql-list" value="bullet"></button>
+                                                <button class="ql-blockquote"></button>
+                                            </span>
+                                        </div>
+                                        <div id="desc-editor" class="report-editor" style="height:250px;"></div>
+                                        <input type="hidden" name="description" id="service_description">
+                                    </div>
+
+                                    <!-- Section: SEO -->
+                                    <div class="col-12 mt-4">
+                                        <h6 class="text-primary border-bottom pb-2 mb-3">SEO Optimization</h6>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label class="form-label">SEO Title</label>
+                                        <input type="text" name="seo_title" id="service_seo_title" class="form-control" placeholder="Browser tab title">
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label class="form-label">SEO Keywords</label>
+                                        <input type="text" name="seo_keywords" id="service_seo_keyword" class="form-control" placeholder="keyword1, keyword2, keyword3">
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label class="form-label">SEO Description</label>
+                                        <textarea name="seo_description" id="service_seo_description" class="form-control" rows="3" placeholder="Meta description for search engines"></textarea>
+                                    </div>
+
+                                    <div class="col-12 mt-3">
+                                        <div class="d-flex gap-4">
+                                            <div class="form-check form-switch p-0">
+                                                <label class="form-check-label ms-0 fw-bold" for="is_featured">Featured Service</label>
+                                                <div class="mt-2 d-flex align-items-center gap-2">
+                                                    <input class="form-check-input ms-0" type="checkbox" name="is_featured" id="is_featured" value="1">
+                                                    <span class="text-muted small">Highlight on homepage</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-check form-switch p-0">
+                                                <label class="form-check-label ms-0 fw-bold" for="service_is_active">Publish Status</label>
+                                                <div class="mt-2 d-flex align-items-center gap-2">
+                                                    <input class="form-check-input ms-0" type="checkbox" name="is_active" id="service_is_active" value="1" checked>
+                                                    <span class="text-muted small">Visible on website</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="fas fa-save me-2"></i> Save Service
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ===================== PREVIEW MODAL (REDESIGNED + SCROLLABLE) ===================== -->
+
+
+
+            <div class="modal fade" id="previewServiceModal" tabindex="-1">
+                <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content preview-modal-content">
+
+
+                        <!-- BANNER -->
+                        <div id="previewBanner" class="preview-banner">
+                            <div class="preview-overlay"></div>
+                            <div class="preview-header">
+                                <div id="previewIcon" class="preview-icon"></div>
+                                <h3 id="previewServiceTitle" class="mb-1"></h3>
+                                <p id="previewSlug" class="preview-short mb-0"></p>
+                            </div>
+                        </div>
+
+                        <!-- BODY -->
+                        <div class="preview-body" style="overflow-y: auto; max-height: calc(100dvh - 360px);">
+
+
+                            <h6 class="text-uppercase text-muted">Service Sort Description</h6>
+                            <div id="previewServiceShort" class="mt-2 mb-2"></div>
+
+
+
+                            <h6 class="text-uppercase text-muted">Service Description</h6>
+                            <div id="previewServiceDesc" class="mt-2 mb2"></div>
+
+                            <div class="preview-meta mt-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Starting Price:</strong>
+                                        <span id="previewPrice"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Price Note:</strong>
+                                        <span id="previewNote"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <strong>Display Order:</strong>
+                                        <span id="previewOrder"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Is Featured:</strong>
+                                        <span class="badge bg-info" id="previewFeatured"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <strong>Service Group:</strong>
+                                        <span id="previewServiceGroup"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Industry Sub-categories:</strong>
+                                        <span id="previewIndustrySubcategories"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <strong>Created At:</strong>
+                                        <span id="previewCreated"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Updated At:</strong>
+                                        <span id="previewUpdated"></span>
+                                    </div>
+                                </div>
+
+
+                                <div class="mt-3">
+                                    <strong>SEO Title:</strong>
+                                    <span id="previewSeoTitle"></span>
+                                </div>
+
+                                <div class="mt-2">
+                                    <strong>SEO Description:</strong>
+                                    <span id="previewSeoDesc"></span>
+                                </div>
+
+                                <div class="mt-2">
+                                    <strong>SEO Keywords:</strong>
+                                    <span id="previewSeoKeywords"></span>
+                                </div>
+
+                                <div class="preview-badges mt-3">
+                                    <!-- <span class="badge bg-info" id="previewFeatured"></span> -->
+                                    <span class="badge bg-success" id="previewStatus"></span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+<!-- ================= Delete Record ================= -->
+            <div class="modal fade" id="deleteModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Delete</h5>
+                            <button class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            Are you sure you want to delete this record?
+                        </div>
+
+                        <div class="modal-footer">
+                            <form id="deleteForm" method="POST">
+                                <button type="submit" class="btn btn-danger">
+                                    Yes, Delete
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cancel
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            {% include 'admin/head_foot/script.html' %}
+
+
+
+
+            <!-- ===================== 1. SLUG + BASIC UTILITIES ===================== -->
+            <script>
+                function generateSlug(text) {
+                    return text
+                        .toLowerCase()
+                        .trim()
+                        .replace(/&/g, 'and')
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/^-+|-+$/g, '');
+                }
+
+                function resolveImageUrl(path) {
+                    if (!path) return '';
+                    if (path.startsWith('http')) return path;
+                    if (path.startsWith('/')) return path;
+                    return `/static/${path.replace(/^static\//, '')}`;
+                }
+            </script>
+
+
+            <!-- ===================== 2. ELEMENT REFERENCES ===================== -->
+            <script>
+                const serviceModal = document.getElementById('serviceModal');
+                const serviceModalTitle = document.getElementById('serviceModalTitle');
+
+                const service_id = document.getElementById('service_id');
+                const service_title = document.getElementById('service_title');
+                const service_slug = document.getElementById('service_slug');
+                const service_group = document.getElementById('service_group');
+                const industry_subcategories = document.getElementById('industry_subcategories');
+
+                const starting_price = document.getElementById('starting_price');
+                const price_note = document.getElementById('price_note');
+                const service_seo_title = document.getElementById('service_seo_title');
+                const service_seo_keyword = document.getElementById('service_seo_keyword');
+                const service_seo_description = document.getElementById('service_seo_description');
+
+                const display_order = document.getElementById('display_order');
+
+                const is_featured = document.getElementById('is_featured');
+                const service_is_active = document.getElementById('service_is_active');
+
+                const bannerUpload = document.getElementById('bannerUpload');
+                const bannerPreview = document.getElementById('bannerPreview');
+
+                const iconUpload = document.getElementById('iconUpload');
+                const iconLivePreview = document.getElementById('iconLivePreview');
+            </script>
+
+
+            <!-- ===================== 3. AUTO SLUG GENERATOR ===================== -->
+            <script>
+                let isManualSlugEdit = false;
+
+                service_slug.addEventListener('input', () => {
+                    isManualSlugEdit = true;
+                });
+
+                service_title.addEventListener('input', () => {
+                    if (!service_id.value && !isManualSlugEdit) {
+                        service_slug.value = generateSlug(service_title.value);
+                    }
+                });
+            </script>
+
+
+            <!-- ===================== 4. QUILL INITIALIZATION ===================== -->
+            <script>
+                let shortQuill = null;
+                let descQuill = null;
+
+                serviceModal.addEventListener('shown.bs.modal', () => {
+                    if (!shortQuill) {
+                        shortQuill = new Quill('#short-editor', {
+                            theme: 'snow',
+                            modules: { toolbar: '#short-editor-toolbar' }
+                        });
+                    }
+                    if (!descQuill) {
+                        descQuill = new Quill('#desc-editor', {
+                            theme: 'snow',
+                            modules: { toolbar: '#desc-editor-toolbar' }
+                        });
+                    }
+                });
+
+                function openAddModal() {
+                    serviceModalTitle.innerText = 'Create Service';
+                    isManualSlugEdit = false;
+
+                    service_id.value = '';
+                    service_title.value = '';
+                    service_slug.value = '';
+                    if (service_group) service_group.value = '';
+                    if (industry_subcategories) industry_subcategories.value = '';
+                    starting_price.value = '0';
+                    price_note.value = '';
+                    service_seo_title.value = '';
+                    service_seo_keyword.value = '';
+                    service_seo_description.value = '';
+                    display_order.value = '0';
+
+                    is_featured.checked = false;
+                    service_is_active.checked = true;
+
+                    iconUpload.value = '';
+                    iconLivePreview.innerHTML = '<small>Icon Preview</small>';
+
+                    bannerPreview.style.backgroundImage = '';
+                    bannerPreview.classList.remove('loaded');
+
+                    if (shortQuill) shortQuill.root.innerHTML = '';
+                    if (descQuill) descQuill.root.innerHTML = '';
+
+                    new bootstrap.Modal(serviceModal).show();
+                }
+
+                function editService(btn) {
+                    const service = btn.dataset;
+                    serviceModalTitle.innerText = 'Edit Service';
+                    isManualSlugEdit = true;
+
+                    service_id.value = service.id;
+                    service_title.value = service.title || '';
+                    service_slug.value = service.slug || '';
+                    if (service_group) service_group.value = service.group || '';
+                    if (industry_subcategories) industry_subcategories.value = service.subs || '';
+
+                    starting_price.value = service.price ?? 0;
+                    price_note.value = service.note ?? '';
+                    display_order.value = service.order ?? 0;
+
+                    service_seo_title.value = service.seoTitle ?? '';
+                    service_seo_keyword.value = service.seoKeyword ?? '';
+                    service_seo_description.value = service.seoDesc ?? '';
+
+                    is_featured.checked = Number(service.featured) === 1;
+                    service_is_active.checked = Number(service.active) === 1;
+
+                    iconUpload.value = service.icon || '';
+                    iconLivePreview.innerHTML = service.icon
+                        ? `<i class="${service.icon}"></i>`
+                        : '<i class="fas fa-question-circle"></i>';
+
+                    bannerPreview.style.backgroundImage = service.banner
+                        ? `url(${resolveImageUrl(service.banner)})`
+                        : '';
+                    bannerPreview.classList.toggle('loaded', !!service.banner);
+
+                    const modal = new bootstrap.Modal(serviceModal);
+                    modal.show();
+
+                    const handler = () => {
+                        if (shortQuill) {
+                            shortQuill.root.innerHTML = service.shortDesc || '';
+                        }
+                        if (descQuill) {
+                            descQuill.root.innerHTML = service.desc || '';
+                        }
+                        serviceModal.removeEventListener('shown.bs.modal', handler);
+                    };
+                    serviceModal.addEventListener('shown.bs.modal', handler);
+                }
+            </script>
+
+
+            <!-- ===================== 5. FORM → QUILL SYNC ===================== -->
+             <script>
+                 document.querySelector('#serviceModal form').addEventListener('submit', () => {
+                     if (shortQuill) {
+                         document.getElementById('service_short_desc').value = shortQuill.root.innerHTML;
+                     }
+                     if (descQuill) {
+                         document.getElementById('service_description').value = descQuill.root.innerHTML;
+                     }
+                 });
+
+                function previewImage(input, previewBox) {
+                    if (input.files && input.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = e => {
+                            previewBox.style.backgroundImage = `url(${e.target.result})`;
+                            previewBox.classList.add('loaded');
+                        };
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                }
+
+                if (bannerUpload) {
+                    bannerUpload.addEventListener('change', () =>
+                        previewImage(bannerUpload, bannerPreview)
+                    );
+                }
+
+                if (iconUpload) {
+                    iconUpload.addEventListener('input', () => {
+                        iconLivePreview.innerHTML = iconUpload.value
+                            ? `<i class="${iconUpload.value}"></i>`
+                            : '<small>Icon Preview</small>';
+                    });
+                }
+             </script>
+
+
+
+            <!-- ===================== 9. PREVIEW SERVICE ===================== -->
+            <script>
+                function previewService(btn) {
+                    const service = btn.dataset;
+                    previewServiceTitle.innerText = service.title || '';
+                    previewSlug.innerText = '/' + (service.slug || '');
+                    previewServiceShort.innerHTML = service.shortDesc || '<span class="text-muted italic">No short description</span>';
+                    previewServiceDesc.innerHTML = service.desc || '<span class="text-muted italic">No full description</span>';
+
+                    previewPrice.innerText = service.price && service.price !== '0'
+                        ? `₹ ${service.price}`
+                        : '—';
+
+                    previewNote.innerText = service.note || '—';
+                    previewOrder.innerText = service.order ?? '0';
+                    previewServiceGroup.innerText = service.group || '—';
+                    previewIndustrySubcategories.innerText = service.subs || '—';
+
+                    previewSeoTitle.innerText = service.seoTitle || '—';
+                    previewSeoDesc.innerText = service.seoDesc || '—';
+                    previewSeoKeywords.innerText = service.seoKeyword || '—';
+
+                    previewIcon.innerHTML = service.icon
+                        ? `<i class="${service.icon}"></i>`
+                        : '';
+
+                    previewFeatured.innerText = Number(service.featured) === 1 ? 'Featured' : 'Standard';
+                    previewFeatured.className = Number(service.featured) === 1 ? 'badge bg-info' : 'badge bg-light text-dark border';
+                    
+                    previewStatus.innerText = Number(service.active) === 1 ? 'Active' : 'Inactive';
+                    previewStatus.className = Number(service.active) === 1 ? 'badge bg-success' : 'badge bg-secondary';
+
+                    previewCreated.innerText = service.created || '';
+                    previewUpdated.innerText = service.updated || '';
+
+                    previewBanner.style.backgroundImage = service.banner
+                        ? `url(${resolveImageUrl(service.banner)})`
+                        : '';
+                    
+                    new bootstrap.Modal(document.getElementById('previewServiceModal')).show();
+                }
+            </script>
+
+
+
+            <!-- ===================== 10. DELETE SERVICE ===================== -->
+            <script>
+            function setDeleteUrl(url) {
+                document.getElementById('deleteForm').action = url;
+            }
+            </script>
+
+
+            <!-- ===================== 11. FIX BACKDROP / SCREEN FREEZE ===================== -->
+            <script>
+                serviceModal.addEventListener('hidden.bs.modal', () => {
+                    document.body.classList.remove('modal-open');
+                    document.body.style.removeProperty('padding-right');
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                });
+            </script>
+
+
+</body>
+
+</html>

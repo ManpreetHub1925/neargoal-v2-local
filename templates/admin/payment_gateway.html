@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% include 'admin/head_foot/style.html' %}
+</head>
+
+<body>
+    <div id="app">
+        <div class="main-wrapper">
+
+            <div class="navbar-bg"></div>
+            {% include 'admin/head_foot/head.html' %}
+
+
+            <div class="main-content">
+                <section class="section">
+
+                    <div class="section-header">
+                        <h1>Payment Gateway</h1>
+                        <div class="section-header-breadcrumb">
+                            <div class="breadcrumb mb-0">
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                                </div>
+                                <div class="breadcrumb-item"><a href="{{ url_for('admin.settings') }}">Settings</a>
+                                </div>
+                                <div class="breadcrumb-item active" aria-current="page">Payment Gateway</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <ul class="nav nav-pills flex-column" id="basicPaymentTab" role="tablist">
+
+                                            <li class="nav-item">
+                                                <a class="nav-link active show" id="stripe-tab" data-bs-toggle="tab"
+                                                    href="#stripe_payment_tab" role="tab" aria-controls="stripe"
+                                                    aria-selected="true">Stripe Payment</a>
+                                            </li>
+
+                                            <li class="nav-item">
+                                                <a class="nav-link" id="paypal-tab" data-bs-toggle="tab"
+                                                    href="#payU_payment_tab" role="tab" aria-controls="payU"
+                                                    aria-selected="false">PayU Payment</a>
+                                            </li>
+
+                                            <li class="nav-item">
+                                                <a class="nav-link" id="razorpay-tab" data-bs-toggle="tab"
+                                                    href="#razorpay_tab" role="tab" aria-controls="razorpay"
+                                                    aria-selected="false">Razorpay</a>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-body">
+
+                                        <div class="tab-content" id="myTabContent4">
+                                            <!-- IMPORTANT: Button and toggle styles are NOT changed -->
+
+                                            <!-- STRIPE TAB -->
+                                            <div class="tab-pane fade active show" id="stripe_payment_tab"
+                                                role="tabpanel">
+                                                <form method="POST" action="{{ url_for('admin.payment_gateway') }}"
+                                                    enctype="multipart/form-data">
+                                                    <input type="hidden" name="section" value="stripe">
+
+                                                    <div class="row">
+                                                        <div class="form-group col-md-6">
+                                                            <label>Gateway charge (%)</label>
+                                                            <input type="text" name="stripe_charge"
+                                                                value="{{ payment_settings.get('stripe_charge', {}).get('value','0') }}"
+                                                                class="form-control">
+                                                        </div>
+
+                                                        <div class="form-group col-md-6">
+                                                            <label>Stripe Key</label>
+                                                            <input type="text" name="stripe_key"
+                                                                value="{{ payment_settings.get('stripe_key', {}).get('value','') }}"
+                                                                class="form-control">
+                                                        </div>
+
+                                                        <div class="form-group col-md-12">
+                                                            <label>Stripe Secret</label>
+                                                            <input type="text" name="stripe_secret"
+                                                                value="{{ payment_settings.get('stripe_secret', {}).get('value','') }}"
+                                                                class="form-control">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label class="d-flex align-items-center mb-0">
+                                                            <input type="hidden" name="stripe_status" value="inactive">
+                                                            <input type="checkbox" name="stripe_status"
+                                                                class="custom-switch-input" value="active" {% if
+                                                                payment_settings.get('stripe_status',
+                                                                {}).get('status')==1 %}checked{% endif %}>
+                                                            <span class="custom-switch-indicator"></span>
+                                                            <span class="custom-switch-description">Status</span>
+                                                        </label>
+                                                    </div>
+
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="fa fa-sync"></i> Update
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                            <!-- PAYU / PAYPAL TAB -->
+                                            <div class="tab-pane fade" id="payU_payment_tab" role="tabpanel">
+                                                <form method="POST" action="{{ url_for('admin.payment_gateway') }}">
+                                                    <input type="hidden" name="section" value="paypal">
+
+                                                    <div class="row">
+                                                        <div class="form-group col-md-6">
+                                                            <label>Gateway charge (%)</label>
+                                                            <input type="text" name="paypal_charge"
+                                                                value="{{ payment_settings.get('paypal_charge', {}).get('value','0') }}"
+                                                                class="form-control">
+                                                        </div>
+
+                                                        <div class="form-group col-md-6">
+                                                            <label>Account Mode</label>
+                                                            <select name="paypal_account_mode"
+                                                                class="form-control form-select">
+                                                                <option value="live" {% if
+                                                                    payment_settings.get('paypal_account_mode',
+                                                                    {}).get('value')=='live' %}selected{% endif %}>
+                                                                    Live
+                                                                </option>
+                                                                <option value="sandbox" {% if
+                                                                    payment_settings.get('paypal_account_mode',
+                                                                    {}).get('value')=='sandbox' %}selected{% endif %}>
+                                                                    Sandbox
+                                                                </option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="form-group col-md-12">
+                                                            <label>Client ID</label>
+                                                            <input type="text" name="paypal_client_id"
+                                                                value="{{ payment_settings.get('paypal_client_id', {}).get('value','') }}"
+                                                                class="form-control">
+                                                        </div>
+
+                                                        <div class="form-group col-md-12">
+                                                            <label>Secret Key</label>
+                                                            <input type="text" name="paypal_secret_key"
+                                                                value="{{ payment_settings.get('paypal_secret_key', {}).get('value','') }}"
+                                                                class="form-control">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label class="d-flex align-items-center mb-0">
+                                                            <input type="hidden" name="paypal_status" value="inactive">
+                                                            <input type="checkbox" name="paypal_status"
+                                                                class="custom-switch-input" value="active" {% if
+                                                                payment_settings.get('paypal_status',
+                                                                {}).get('status')==1 %}checked{% endif %}>
+                                                            <span class="custom-switch-indicator"></span>
+                                                            <span class="custom-switch-description">Status</span>
+                                                        </label>
+                                                    </div>
+
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="fa fa-sync"></i> Update
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                            <!-- RAZORPAY TAB -->
+                                            <div class="tab-pane fade" id="razorpay_tab" role="tabpanel">
+                                                <form method="POST" action="{{ url_for('admin.payment_gateway') }}">
+                                                    <input type="hidden" name="section" value="razorpay">
+
+                                                    <div class="row">
+                                                        <div class="form-group col-md-6">
+                                                            <label>Gateway charge (%)</label>
+                                                            <input type="text" name="razorpay_charge"
+                                                                value="{{ payment_settings.get('razorpay_charge', {}).get('value','0') }}"
+                                                                class="form-control">
+                                                        </div>
+
+                                                        <div class="form-group col-md-6">
+                                                            <label>Key</label>
+                                                            <input type="text" name="razorpay_key"
+                                                                value="{{ payment_settings.get('razorpay_key', {}).get('value','') }}"
+                                                                class="form-control">
+                                                        </div>
+
+                                                        <div class="form-group col-md-6">
+                                                            <label>Secret</label>
+                                                            <input type="text" name="razorpay_secret"
+                                                                value="{{ payment_settings.get('razorpay_secret', {}).get('value','') }}"
+                                                                class="form-control">
+                                                        </div>
+
+                                                        <div class="form-group col-md-6">
+                                                            <label>App Name</label>
+                                                            <input type="text" name="razorpay_name"
+                                                                value="{{ payment_settings.get('razorpay_name', {}).get('value','') }}"
+                                                                class="form-control">
+                                                        </div>
+
+                                                        <div class="form-group col-md-6">
+                                                            <label>Description</label>
+                                                            <input type="text" name="razorpay_description"
+                                                                value="{{ payment_settings.get('razorpay_description', {}).get('value','') }}"
+                                                                class="form-control">
+                                                        </div>
+
+                                                        <div class="form-group col-md-6">
+                                                            <label>Theme Color</label>
+                                                            <input type="color" name="razorpay_theme_color"
+                                                                value="{{ payment_settings.get('razorpay_theme_color', {}).get('value','#000000') }}"
+                                                                class="form-control">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label class="d-flex align-items-center mb-0">
+                                                            <input type="hidden" name="razorpay_status"
+                                                                value="inactive">
+                                                            <input type="checkbox" name="razorpay_status"
+                                                                class="custom-switch-input" value="active" {% if
+                                                                payment_settings.get('razorpay_status',
+                                                                {}).get('status')==1 %}checked{% endif %}>
+                                                            <span class="custom-switch-indicator"></span>
+                                                            <span class="custom-switch-description">Status</span>
+                                                        </label>
+                                                    </div>
+
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="fa fa-sync"></i> Update
+                                                    </button>
+                                                </form>
+                                            </div>
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+
+
+            {% include 'admin/head_foot/script.html' %}
+
+
+            <script>
+                //Tab active setup locally
+                $(document).ready(function () {
+                    activeTabSetupLocally('basicPaymentTab')
+                });
+            </script>
+
+</body>
+
+</html>
